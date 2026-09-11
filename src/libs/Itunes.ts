@@ -2,6 +2,7 @@ import { FeedItem } from "../types/feed_item"
 import { convertMillsTimeToDuration } from "./Common"
 import { FeedChannel } from "../types/feed_channel"
 import { API_URL } from "./Constants"
+import { CONTENT_POLICY_ERROR, isBlockedContent } from "./contentFilter"
 
 interface RssItem {
     guid: string;
@@ -16,7 +17,7 @@ interface RssItem {
         image: string;
         episode?: string;
         season?: string;
-        explicit?: boolean;
+        explicit?: string;
         episodeType?: string;
     };
     enclosure: {
@@ -39,6 +40,7 @@ interface RssFeed {
         };
         categories: string[];
         type: string;
+        explicit?: string;
     };
     imageUrl: string;
     copyright: string;
@@ -53,6 +55,22 @@ export const searchPodcastEpisodeFromItunes = async (q: string, entity: string, 
     const excludeFeedIdList = excludeFeedId.split(',')
     for (const resultItem of jsonResp.results) {
         if (excludeFeedIdList.includes(String(resultItem.collectionId))) {
+            continue
+        }
+
+        const explicitness = String(resultItem.trackExplicitness || resultItem.collectionExplicitness || resultItem.contentAdvisoryRating || '')
+        const categories = Array.isArray(resultItem.genres)
+            ? resultItem.genres
+                .map((genre: any) => (typeof genre === 'string' ? genre : genre?.name))
+                .filter((name: any): name is string => typeof name === 'string' && name.length > 0)
+            : []
+        if (isBlockedContent({
+            title: resultItem.trackName,
+            channelTitle: resultItem.collectionName,
+            description: resultItem.description,
+            categories,
+            explicit: explicitness
+        })) {
             continue
         }
 
@@ -74,7 +92,7 @@ export const searchPodcastEpisodeFromItunes = async (q: string, entity: string, 
             EnclosureLength: resultItem.trackTimeMillis,
             Duration: duration,
             Episode: "",
-            Explicit: "",
+            Explicit: explicitness,
             Season: "",
             EpisodeType: "",
             Description: resultItem.description,
@@ -137,19 +155,40 @@ export const getPodcastInfo = async (podcastId: string): Promise<FeedChannel> =>
     return channelInfo
 }
 
+const assertChannelAllowed = (rssFeed: RssFeed) => {
+    if (isBlockedContent({
+        title: rssFeed.title,
+        description: rssFeed.description,
+        categories: rssFeed.itunes.categories,
+        explicit: rssFeed.itunes.explicit
+    })) {
+        throw new Error(CONTENT_POLICY_ERROR)
+    }
+}
+
+const isAllowedRssItem = (item: RssItem): boolean => {
+    return !isBlockedContent({
+        title: item.title,
+        description: item.description,
+        explicit: item.itunes.explicit
+    })
+}
+
 export const getPodcastAllInfo = async (podcastId: string): Promise<{ podcast: FeedChannel, episodes: FeedItem[] }> => {
     const res = await fetch(`https://itunes.apple.com/lookup?id=${podcastId}&entity=podcast`)
     const jsonResp = await res.json()
     const podcastInfo = jsonResp.results[0]
     const feedLink = podcastInfo.feedUrl
     const rssFeed = await parsePodcastRSS(feedLink);
+    assertChannelAllowed(rssFeed)
 
     var episodeList: FeedItem[] = []
-    rssFeed.items.forEach(item => {
+    rssFeed.items.filter(isAllowedRssItem).forEach(item => {
         episodeList.push(buildFeedItemModel(rssFeed, feedLink, encodeURIComponent(item.guid), podcastId));
     })
     var channelInfo: FeedChannel = buildFeedChannelModel(rssFeed, feedLink, podcastId);
     channelInfo.Items = episodeList
+    channelInfo.Count = episodeList.length
 
     return {
         podcast: channelInfo,
@@ -163,7 +202,16 @@ export const getPodcastEpisodeInfo = async (podcastId: string, episodeId: string
     const podcastInfo = jsonResp.results[0]
     const feedLink = podcastInfo.feedUrl
     const rss = await parsePodcastRSS(feedLink);
+    assertChannelAllowed(rss)
     const episodeInfo = buildFeedItemModel(rss, feedLink, episodeId, podcastId);
+    if (isBlockedContent({
+        title: episodeInfo.Title,
+        description: episodeInfo.Description,
+        channelTitle: episodeInfo.ChannelTitle,
+        explicit: episodeInfo.Explicit
+    })) {
+        throw new Error(CONTENT_POLICY_ERROR)
+    }
     var channelInfo: FeedChannel = buildFeedChannelModel(rss, feedLink, podcastId);
 
     return {
@@ -280,6 +328,7 @@ const parsePodcastRSS = async (feedUrl: string): Promise<RssFeed> => {
 
     const itunesAuthor = channel.getElementsByTagName('itunes:author')[0]?.textContent || '';
     const itunesType = channel.getElementsByTagName('itunes:type')[0]?.textContent || '';
+    const itunesExplicit = channel.getElementsByTagName('itunes:explicit')[0]?.textContent || '';
     const itunesOwnerName = channel.getElementsByTagName('itunes:name')[0]?.textContent || '';
     const itunesOwnerEmail = channel.getElementsByTagName('itunes:email')[0]?.textContent || '';
 
@@ -336,7 +385,7 @@ const parsePodcastRSS = async (feedUrl: string): Promise<RssFeed> => {
                 image: itImage,
                 episode: itEpisode,
                 season: itSeason,
-                explicit: itExplicit === 'true',
+                explicit: itExplicit,
                 episodeType: itEpisodeType
             },
             enclosure: {
@@ -359,7 +408,8 @@ const parsePodcastRSS = async (feedUrl: string): Promise<RssFeed> => {
                 email: itunesOwnerEmail
             },
             categories,
-            type: itunesType
+            type: itunesType,
+            explicit: itunesExplicit
         },
         imageUrl,
         copyright,

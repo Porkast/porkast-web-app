@@ -9,12 +9,15 @@ import { addLinkTagToUrl, removeTextColorStyles, replaceWithBr } from '../libs/C
 import { getPodcastAllInfo } from '../libs/Itunes'
 import { AvatarImage } from '../component/PorkastImage'
 import Loading from '../component/Loading'
+import ContentUnavailable from '../component/ContentUnavailable'
+import { CONTENT_REPORT_EMAIL } from '../libs/contentFilter'
 
 export default function PodcastChannelPage() {
     const { channelId } = useParams()
     const [searchParams] = useSearchParams()
     const page = searchParams.get('page') || '1'
     const [podcastData, setPodcastData] = useState<{ podcast: any; episodes: any[] } | null>(null)
+    const [loadFailed, setLoadFailed] = useState(false)
 
     useEffect(() => {
         if (!channelId) return
@@ -24,8 +27,21 @@ export default function PodcastChannelPage() {
             data.episodes = data.episodes.slice(offset, offset + limit)
             data.podcast.Items = data.podcast.Items.slice(offset, offset + limit)
             setPodcastData(data)
+        }).catch(() => {
+            setLoadFailed(true)
         })
     }, [channelId, page])
+
+    if (loadFailed) {
+        return (
+            <AppProvider>
+                <Header keyword={""}>
+                    <ContentUnavailable />
+                </Header>
+                <Footer />
+            </AppProvider>
+        )
+    }
 
     if (!podcastData) return <Loading />
 
@@ -138,6 +154,14 @@ export default function PodcastChannelPage() {
                                     <button className="join-item btn btn-neutral">Page {page}</button>
                                     <Link className="join-item btn btn-neutral" to={nextPageUrl}>»</Link>
                                 </div>
+                            </div>
+                            <div className="w-full flex justify-center pb-9">
+                                <a
+                                    className="link link-hover text-xs text-gray-400"
+                                    href={`mailto:${CONTENT_REPORT_EMAIL}?subject=${encodeURIComponent('Content report')}`}
+                                >
+                                    Report content
+                                </a>
                             </div>
                         </div>
                     </div>

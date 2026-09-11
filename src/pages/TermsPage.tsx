@@ -50,6 +50,13 @@ const content: Record<Lang, {
                 ]
             },
             {
+                heading: 'Prohibited Content',
+                paragraphs: [
+                    'Porkast prohibits adult, NSFW, and other unlawful or harmful content on the Service. Prohibited content is filtered from search results, podcast pages, subscriptions, and generated RSS feeds.',
+                    'For the full list of prohibited categories and how to report content, see our Content Policy at porkast.com/content-policy.',
+                ]
+            },
+            {
                 heading: 'Intellectual Property Rights',
                 paragraphs: [
                     'Podcast content accessible through Porkast is owned by the respective podcast creators and rights holders. Porkast does not claim ownership over any third-party podcast content.',
@@ -138,6 +145,13 @@ const content: Record<Lang, {
                     '您对自己订阅的关键词和保存的内容负责。',
                     '您同意不将本服务用于任何非法目的。',
                     '您同意不试图未经授权访问我们的系统。',
+                ]
+            },
+            {
+                heading: '禁止内容',
+                paragraphs: [
+                    'Porkast 禁止成人、NSFW 以及其他违法或有害内容。禁止内容会从搜索结果、播客页面、订阅内容以及生成的 RSS 源中过滤。',
+                    '完整的禁止类别清单和举报方式请参见我们的内容政策：porkast.com/content-policy。',
                 ]
             },
             {

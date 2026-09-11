@@ -12,19 +12,35 @@ import { removeTextColorStyles } from '../libs/Common'
 import type { FeedItem } from '../types/feed_item'
 import type { FeedChannel } from '../types/feed_channel'
 import Loading from '../component/Loading'
+import ContentUnavailable from '../component/ContentUnavailable'
+import { CONTENT_REPORT_EMAIL } from '../libs/contentFilter'
 
 export default function PodcastEpisodePage() {
     const { channelId, itemId } = useParams()
     const [episode, setEpisode] = useState<FeedItem | null>(null)
     const [podcastInfo, setPodcastInfo] = useState<FeedChannel | null>(null)
+    const [loadFailed, setLoadFailed] = useState(false)
 
     useEffect(() => {
         if (!channelId || !itemId) return
         getPodcastEpisodeInfo(channelId, itemId).then(data => {
             setEpisode(data.episode as any)
             setPodcastInfo(data.podcast as any)
+        }).catch(() => {
+            setLoadFailed(true)
         })
     }, [channelId, itemId])
+
+    if (loadFailed) {
+        return (
+            <AppProvider>
+                <Header>
+                    <ContentUnavailable />
+                </Header>
+                <Footer />
+            </AppProvider>
+        )
+    }
 
     if (!episode || !podcastInfo) return <Loading />
 
@@ -89,6 +105,14 @@ export default function PodcastEpisodePage() {
                                         }} />
                                     </div>
                                 </div>
+                            </div>
+                            <div className="w-full flex justify-center pb-9">
+                                <a
+                                    className="link link-hover text-xs text-gray-400"
+                                    href={`mailto:${CONTENT_REPORT_EMAIL}?subject=${encodeURIComponent('Content report')}`}
+                                >
+                                    Report content
+                                </a>
                             </div>
                         </div>
                     </div>

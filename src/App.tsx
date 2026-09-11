@@ -13,8 +13,10 @@ import ShareSubscriptionPage from './pages/ShareSubscriptionPage'
 import SharePlaylistPage from './pages/SharePlaylistPage'
 import ShareListenLaterPage from './pages/ShareListenLaterPage'
 import ProfilePage from './pages/ProfilePage'
+import PricingPage from './pages/PricingPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
+import ContentPolicyPage from './pages/ContentPolicyPage'
 import ApplePodcastGuidePage from './pages/ApplePodcastGuidePage'
 import NotFound from './pages/NotFound'
 import { AppProvider } from './component/AppContext'
@@ -40,8 +42,10 @@ function App() {
           <Route path="/guide/apple-podcast" element={<ApplePodcastGuidePage />} />
           <Route path="/guide" element={<ApplePodcastGuidePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/content-policy" element={<ContentPolicyPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppProvider>
