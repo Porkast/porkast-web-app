@@ -8,6 +8,7 @@ export default function Footer() {
             </div>
             <div className="flex flex-wrap gap-4 text-xs font-medium">
                 <Link to="/guide/apple-podcast" className="link link-hover">Apple Podcasts Guide</Link>
+                <Link to="/content-policy" className="link link-hover">Content Policy</Link>
                 <Link to="/privacy" className="link link-hover">Privacy</Link>
                 <Link to="/terms" className="link link-hover">Terms</Link>
             </div>

@@ -10,6 +10,7 @@ import SubscribeKeywrodDialog, { SubscribeKeywrodDialogRef } from '../component/
 import { searchPodcastEpisodeFromItunes } from '../libs/Itunes'
 import { useRef } from 'react'
 import { SkeletonSearchEpisodeView } from '../component/SkeletonView'
+import { isBlockedSearchQuery } from '../libs/contentFilter'
 
 enum Page {
     NextPage,
@@ -34,8 +35,16 @@ export default function SearchPage() {
     const [totalPage, setTotalPage] = useState(1)
     const [loading, setLoading] = useState(false)
 
+    const blockedQuery = isBlockedSearchQuery(q)
+
     useEffect(() => {
         if (!q) return
+        if (blockedQuery) {
+            setSearchResults([])
+            setTotalCount(0)
+            setTotalPage(1)
+            return
+        }
         setLoading(true)
         const limit = 10
         const offset = (page - 1) * limit
@@ -46,7 +55,7 @@ export default function SearchPage() {
                 setTotalPage(Math.ceil(data[0].Count / limit))
             }
         }).finally(() => setLoading(false))
-    }, [q, page, country, excludeFeedId])
+    }, [q, page, country, excludeFeedId, blockedQuery])
 
     const prevPageUrl = getTargetPageUrl(q, page, totalPage, Page.PrePage, entity, country, excludeFeedId)
     const nextPageUrl = getTargetPageUrl(q, page, totalPage, Page.NextPage, entity, country, excludeFeedId)
@@ -68,41 +77,50 @@ export default function SearchPage() {
                 <Header keyword={q || ""} title='Search'>
                     <div className="w-full flex justify-center pl-6 pr-6">
                         <div className="w-full max-w-2xl">
-                            <div className='text-neutral-500 text-sm mb-6 ml-2'>{totalCount} results</div>
-                            {loading ? (
-                                <>
-                                    <SkeletonSearchEpisodeView />
-                                    <SkeletonSearchEpisodeView />
-                                    <SkeletonSearchEpisodeView />
-                                </>
+                            {blockedQuery ? (
+                                <div className="alert alert-warning flex-wrap">
+                                    <span>This search term is not allowed by our Content Policy. Adult and prohibited content is filtered from Porkast.</span>
+                                    <Link to="/content-policy" className="btn btn-sm btn-primary">Content Policy</Link>
+                                </div>
                             ) : (
-                                searchResults?.map((item: FeedItem) => {
-                                    return (
-                                        <EpisodeCard key={item.Id} data={{
-                                            itemId: item.GUID,
-                                            channelId: item.ChannelId,
-                                            title: item.HighlightTitle,
-                                            description: item.TextDescription,
-                                            image: item.ImageUrl,
-                                            link: item.Link,
-                                            rssLink: item.FeedLink,
-                                            channelName: item.HighlightChannelTitle,
-                                            authorName: item.Author,
-                                            pubDate: item.PubDate,
-                                            audioLength: item.Duration,
-                                            audioSrc: item.EnclosureUrl,
-                                            showExcludeBtn: true
-                                        }}
-                                            onExcludeModalBtnClick={showExcludeDialog}
-                                        />
-                                    )
-                                })
+                                <>
+                                    <div className='text-neutral-500 text-sm mb-6 ml-2'>{totalCount} results</div>
+                                    {loading ? (
+                                        <>
+                                            <SkeletonSearchEpisodeView />
+                                            <SkeletonSearchEpisodeView />
+                                            <SkeletonSearchEpisodeView />
+                                        </>
+                                    ) : (
+                                        searchResults?.map((item: FeedItem) => {
+                                            return (
+                                                <EpisodeCard key={item.Id} data={{
+                                                    itemId: item.GUID,
+                                                    channelId: item.ChannelId,
+                                                    title: item.HighlightTitle,
+                                                    description: item.TextDescription,
+                                                    image: item.ImageUrl,
+                                                    link: item.Link,
+                                                    rssLink: item.FeedLink,
+                                                    channelName: item.HighlightChannelTitle,
+                                                    authorName: item.Author,
+                                                    pubDate: item.PubDate,
+                                                    audioLength: item.Duration,
+                                                    audioSrc: item.EnclosureUrl,
+                                                    showExcludeBtn: true
+                                                }}
+                                                    onExcludeModalBtnClick={showExcludeDialog}
+                                                />
+                                            )
+                                        })
+                                    )}
+                                    <div className='flex justify-start w-full'>
+                                        <button className="btn btn-primary rounded-lg ml-4" onClick={showSubscribeSearchKeywordDialog}>
+                                            <span className="font-bold text-base">Subscribe {q}</span>
+                                        </button>
+                                    </div>
+                                </>
                             )}
-                            <div className='flex justify-start w-full'>
-                                <button className="btn btn-primary rounded-lg ml-4" onClick={showSubscribeSearchKeywordDialog}>
-                                    <span className="font-bold text-base">Subscribe {q}</span>
-                                </button>
-                            </div>
                         </div>
                     </div>
                     <div className="w-full flex justify-center pt-6 pb-9">

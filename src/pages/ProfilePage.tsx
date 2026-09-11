@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppProvider } from '../component/AppContext'
 import Footer from '../component/Footer'
 import Header from '../component/Header'
 import { getUserSessionInfo, getUserInfoFromServer, updateNicknameToServer, setUserSessionInfo } from '../libs/User'
+import { formatKeywordUsage, formatTier, getUserMembershipStatus } from '../libs/Membership'
+import type { MembershipStatusResult } from '../types/membership'
 import Loading from '../component/Loading'
 
 const NICKNAME_PATTERN = /^[^\s%\/?#&=+]{1,32}$/u
@@ -14,6 +17,7 @@ export default function ProfilePage() {
     const [savedNickname, setSavedNickname] = useState('')
     const [saving, setSaving] = useState(false)
     const [message, setMessage] = useState({ text: '', type: '' })
+    const [membership, setMembership] = useState<MembershipStatusResult | null>(null)
 
     useEffect(() => {
         const load = async () => {
@@ -26,6 +30,8 @@ export default function ProfilePage() {
                     setSavedNickname(nick)
                     setNicknameInput(nick)
                 }
+                const membershipStatus = await getUserMembershipStatus(session.userId)
+                setMembership(membershipStatus)
             }
             setLoading(false)
         }
@@ -107,6 +113,29 @@ export default function ProfilePage() {
 
                                 <div className="text-xs text-gray-500 text-center mt-4">Leave empty and save to clear your nickname (share links fall back to a long user ID)</div>
                             </div>
+
+                            {membership && (
+                                <div className="bg-base-200 p-8 rounded-xl shadow-lg mt-6">
+                                    <h2 className="text-xl font-bold mb-4 text-center text-base-content">Membership</h2>
+                                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                                        <div>
+                                            <div className="badge badge-primary badge-lg">{formatTier(membership.tier)}</div>
+                                            <div className="text-sm text-gray-500 mt-2">{formatKeywordUsage(membership)}</div>
+                                            {membership.isActive && membership.expiresDate && (
+                                                <div className="text-xs text-gray-400 mt-1">
+                                                    {membership.willRenew ? 'Renews' : 'Expires'}: {new Date(membership.expiresDate).toLocaleDateString()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <Link
+                                            to="/pricing"
+                                            className="btn btn-primary btn-sm"
+                                        >
+                                            {membership.isActive && membership.tier !== 'free' ? 'Manage' : 'Upgrade'}
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Header>

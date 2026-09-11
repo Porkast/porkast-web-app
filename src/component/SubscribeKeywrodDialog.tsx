@@ -2,6 +2,8 @@ import { getPodcastInfo } from "../libs/Itunes"
 import { getUserSessionInfo } from "../libs/User"
 import { subscribeSearchKeyword } from "../libs/Subscription"
 import { Ref, forwardRef, useEffect, useState } from "react"
+import { Link } from "react-router-dom"
+import { PAYMENTS_ENABLED } from "../libs/Constants"
 import { useAppContext } from "./AppContext"
 import { MsgAlertType } from "./MsgAlert"
 import type { FeedChannel } from "../types/feed_channel"
@@ -20,6 +22,7 @@ const SubscribeKeywrodDialog = forwardRef<SubscribeKeywrodDialogRef>((_props, re
     const [source, setSource] = useState<string>("itunes")
     const [isLoadingExcludeChannelInfo, setIsLoadingExcludeChannelInfo] = useState(false)
     const [isSubscribeLoading, setIsSubscribeLoading] = useState(false)
+    const [showUpgradeHint, setShowUpgradeHint] = useState(false)
     const appContext = useAppContext()
 
     useEffect(() => {
@@ -29,6 +32,7 @@ const SubscribeKeywrodDialog = forwardRef<SubscribeKeywrodDialogRef>((_props, re
                 showDialog: (keyword: string, excludeFeedIds: string, country: string, source: string) => {
                     if (dialog) {
                         dialog.showModal();
+                        setShowUpgradeHint(false)
                         setSearchKeywrod(keyword)
                         setExcludeFeedIdStr(excludeFeedIds)
                         setCountry(country)
@@ -80,6 +84,11 @@ const SubscribeKeywrodDialog = forwardRef<SubscribeKeywrodDialogRef>((_props, re
             appContext.showMsgAlert('Done', MsgAlertType.SUCCESS)
         } else {
             appContext.showMsgAlert(respJson.message, MsgAlertType.FAILED)
+            if (/limit/i.test(respJson.message || '')) {
+                setShowUpgradeHint(true)
+                setIsSubscribeLoading(false)
+                return
+            }
         }
         setIsSubscribeLoading(false)
         const dialog = document.getElementById('search_keyword_modal') as HTMLDialogElement;
@@ -117,6 +126,19 @@ const SubscribeKeywrodDialog = forwardRef<SubscribeKeywrodDialogRef>((_props, re
                         )
                     }
                     <p className="mt-4 text-gray-500">You will be notified of any updates to the search results. Stay tuned for the latest content!</p>
+                    {showUpgradeHint && (
+                        <div className="alert alert-warning mt-4 flex-wrap">
+                            <span>You reached your keyword limit. Upgrade to add more keywords.</span>
+                            {PAYMENTS_ENABLED ? (
+                                <Link to="/pricing" className="btn btn-sm btn-primary" onClick={() => {
+                                    const dialog = document.getElementById('search_keyword_modal') as HTMLDialogElement;
+                                    dialog?.close()
+                                }}>Upgrade</Link>
+                            ) : (
+                                <span className="badge badge-outline">Upgrade coming soon</span>
+                            )}
+                        </div>
+                    )}
                     <div className="modal-action">
                         {
                             isSubscribeLoading ? (

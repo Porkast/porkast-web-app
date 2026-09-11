@@ -145,8 +145,10 @@ export default function Header(props: HeaderProps) {
                                                     </button>
                                                 </label>
                                                 <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
+                                                    <li><Link to="/pricing" className="text-base">Pricing</Link></li>
                                                     <li><Link to="/profile" className="text-base">Profile</Link></li>
                                                     <li><Link to="/guide/apple-podcast" className="text-base">Subscribe Guide</Link></li>
+                                                    <li><Link to="/content-policy" className="text-base">Content Policy</Link></li>
                                                     <li><Link to="/privacy" className="text-base">Privacy Policy</Link></li>
                                                     <li><Link to="/terms" className="text-base">Terms of Service</Link></li>
                                                     <li onClick={handleLogout}>
@@ -161,7 +163,9 @@ export default function Header(props: HeaderProps) {
                                                 </ul>
                                             </div>
                                         ) : <>
+                                                    <li><Link to="/pricing" className="text-base btn btn-ghost">Pricing</Link></li>
                                                     <li><Link to="/guide/apple-podcast" className="text-base btn btn-ghost">Guide</Link></li>
+                                                    <li><Link to="/content-policy" className="text-base btn btn-ghost">Content Policy</Link></li>
                                                     <li><Link to="/privacy" className="text-base btn btn-ghost">Privacy</Link></li>
                                                     <li><Link to="/terms" className="text-base btn btn-ghost">Terms</Link></li>
                                                     <li><Link className="text-base btn btn-primary" to={"/signin"}>Sign In</Link></li>
@@ -238,8 +242,18 @@ export default function Header(props: HeaderProps) {
                         }
                         <div className="absolute bottom-6 w-72">
                             <li>
+                                <Link to="/pricing" className="text-base font-bold">
+                                    Pricing
+                                </Link>
+                            </li>
+                            <li>
                                 <Link to="/guide/apple-podcast" className="text-base font-bold">
                                     Subscribe Guide
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/content-policy" className="text-base font-bold">
+                                    Content Policy
                                 </Link>
                             </li>
                             <li>
