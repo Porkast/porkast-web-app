@@ -177,7 +177,7 @@ export default function Header(props: HeaderProps) {
                     </div>
                     <div className="pt-20">{props.children}</div>
                     <dialog id="search_modal" className="modal">
-                        <div className="modal-box border-t-4 border-b-4 border-indigo-500">
+                        <div className="modal-box border-t-4 border-b-4 border-primary">
                             <label className="label mb-4">
                                 <span className="label-text">Explore Podcast</span>
                             </label>

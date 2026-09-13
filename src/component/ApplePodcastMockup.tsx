@@ -35,11 +35,11 @@ export default function ApplePodcastMockup({
         {/* Dynamic Island / Speaker Pill */}
         <div className="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-50 flex items-center justify-between px-2">
           <div className="w-2.5 h-2.5 rounded-full bg-neutral-900 ring-1 ring-neutral-800"></div>
-          <div className="w-2 h-2 rounded-full bg-indigo-950/80"></div>
+          <div className="w-2 h-2 rounded-full bg-primary/80"></div>
         </div>
 
         {/* Screen Container */}
-        <div className="relative overflow-hidden rounded-[38px] bg-[#f2f2f7] text-neutral-900 dark:bg-black dark:text-neutral-100 min-h-[670px] flex flex-col font-sans">
+        <div className="relative overflow-hidden rounded-[38px] bg-[#f2f2f7] text-neutral-900 min-h-[670px] flex flex-col font-sans">
           
           {/* iOS Status Bar */}
           <div className="pt-3 px-6 flex justify-between items-center text-xs font-semibold tracking-tight z-40">
@@ -82,14 +82,14 @@ export default function ApplePodcastMockup({
                     <button
                       type="button"
                       onClick={() => handleNextStep(step === 1 ? 2 : 1)}
-                      className={`w-9 h-9 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center transition-all ${
+                      className={`w-9 h-9 rounded-full bg-neutral-200 flex items-center justify-center transition-all ${
                         step === 1 && highlightAction
-                          ? 'ring-4 ring-purple-500 ring-offset-2 animate-bounce'
-                          : 'hover:bg-neutral-300 dark:hover:bg-neutral-700'
+                          ? 'ring-4 ring-primary ring-offset-2 animate-bounce'
+                          : 'hover:bg-neutral-300'
                       }`}
                       aria-label="More Options"
                     >
-                      <svg className="w-5 h-5 fill-current text-purple-600 dark:text-purple-400" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 fill-current text-primary" viewBox="0 0 24 24">
                         <circle cx="5" cy="12" r="2" />
                         <circle cx="12" cy="12" r="2" />
                         <circle cx="19" cy="12" r="2" />
@@ -98,15 +98,15 @@ export default function ApplePodcastMockup({
 
                     {/* Step 1 Interactive Indicator Callout */}
                     {step === 1 && highlightAction && (
-                      <div className="absolute top-11 right-0 w-44 z-30 bg-purple-600 text-white text-xs font-semibold py-1.5 px-2.5 rounded-xl shadow-xl flex items-center gap-1.5 animate-pulse">
-                        <span className="bg-white text-purple-700 rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
+                      <div className="absolute top-11 right-0 w-44 z-30 bg-primary text-primary-content text-xs font-semibold py-1.5 px-2.5 rounded-xl shadow-xl flex items-center gap-1.5 animate-pulse">
+                        <span className="bg-white text-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
                         <span>{isZh ? '点击右上角「···」' : 'Tap the (...) button'}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Profile Avatar */}
-                  <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  <div className="w-9 h-9 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-sm shadow-sm">
                     <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                     </svg>
@@ -115,12 +115,12 @@ export default function ApplePodcastMockup({
               </div>
 
               {/* iOS Menu List */}
-              <div className="bg-white dark:bg-neutral-900 rounded-2xl divide-y divide-neutral-100 dark:divide-neutral-800 shadow-sm overflow-hidden text-sm">
+              <div className="bg-white rounded-2xl divide-y divide-neutral-100 shadow-sm overflow-hidden text-sm">
                 
                 {/* 节目 / Shows */}
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="text-purple-600 dark:text-purple-400">
+                    <div className="text-primary">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="4" y="4" width="16" height="16" rx="2" />
                         <rect x="8" y="2" width="8" height="2" rx="1" />
@@ -134,7 +134,7 @@ export default function ApplePodcastMockup({
                 {/* 类别 / Channels */}
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="text-purple-600 dark:text-purple-400">
+                    <div className="text-primary">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polygon points="12 2 2 7 12 12 22 7 12 2" />
                         <polyline points="2 17 12 22 22 17" />
@@ -149,7 +149,7 @@ export default function ApplePodcastMockup({
                 {/* 已保存 / Saved */}
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="text-purple-600 dark:text-purple-400">
+                    <div className="text-primary">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                       </svg>
@@ -162,7 +162,7 @@ export default function ApplePodcastMockup({
                 {/* 已下载 / Downloaded */}
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="text-purple-600 dark:text-purple-400">
+                    <div className="text-primary">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="8 12 12 16 16 12" />
@@ -177,7 +177,7 @@ export default function ApplePodcastMockup({
                 {/* 最新单集 / Latest Episodes */}
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="text-purple-600 dark:text-purple-400">
+                    <div className="text-primary">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="12 6 12 12 16 14" />
@@ -215,9 +215,9 @@ export default function ApplePodcastMockup({
             </div>
 
             {/* Mini Player Bar */}
-            <div className="mt-2 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md rounded-2xl p-2 flex items-center justify-between border border-neutral-200/60 dark:border-neutral-800 shadow-sm">
+            <div className="mt-2 bg-white/90 backdrop-blur-md rounded-2xl p-2 flex items-center justify-between border border-neutral-200/60 shadow-sm">
               <div className="flex items-center space-x-2 overflow-hidden">
-                <div className="w-8 h-8 rounded-lg bg-indigo-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary text-primary-content flex items-center justify-center font-bold text-xs shrink-0">
                   🎙️
                 </div>
                 <div className="truncate text-left">
@@ -226,7 +226,7 @@ export default function ApplePodcastMockup({
                 </div>
               </div>
               <div className="flex items-center space-x-2 shrink-0 pr-1">
-                <button className="text-neutral-900 dark:text-neutral-100">
+                <button className="text-neutral-900">
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
@@ -242,7 +242,7 @@ export default function ApplePodcastMockup({
             </div>
 
             {/* Bottom iOS Tab Bar */}
-            <div className="mt-2 pt-2 pb-1 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-4 text-center text-[10px]">
+            <div className="mt-2 pt-2 pb-1 border-t border-neutral-200 grid grid-cols-4 text-center text-[10px]">
               <div className="text-neutral-400 flex flex-col items-center">
                 <svg className="w-5 h-5 fill-current mb-0.5" viewBox="0 0 24 24">
                   <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -258,7 +258,7 @@ export default function ApplePodcastMockup({
                 </svg>
                 <span>{isZh ? '新发现' : 'Browse'}</span>
               </div>
-              <div className="text-purple-600 dark:text-purple-400 font-bold flex flex-col items-center">
+              <div className="text-primary font-bold flex flex-col items-center">
                 <svg className="w-5 h-5 fill-current mb-0.5" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="2" />
                   <path d="M12 2a10 10 0 0 0-7.07 17.07l1.42-1.42A8 8 0 1 1 12 20v2a10 10 0 0 0 0-20z" />
@@ -280,7 +280,7 @@ export default function ApplePodcastMockup({
           {step === 2 && (
             <div className="absolute inset-0 bg-black/35 backdrop-blur-[2px] z-40 flex flex-col justify-start pt-14 px-4 transition-all">
               {/* Anchored Popover Menu */}
-              <div className="self-end w-64 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/40 dark:border-neutral-700 overflow-hidden divide-y divide-neutral-200/70 dark:divide-neutral-700 animate-in fade-in zoom-in-95 duration-150">
+              <div className="self-end w-64 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden divide-y divide-neutral-200/70 animate-in fade-in zoom-in-95 duration-150">
                 
                 {/* Menu Item 1: Follow Show by URL (Target) */}
                 <button
@@ -288,12 +288,12 @@ export default function ApplePodcastMockup({
                   onClick={() => handleNextStep(3)}
                   className={`w-full text-left p-3.5 flex items-center justify-between text-sm transition-colors ${
                     highlightAction
-                      ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold'
-                      : 'hover:bg-neutral-100 dark:hover:bg-neutral-700/50'
+                      ? 'bg-primary/10 text-primary font-bold'
+                      : 'hover:bg-neutral-100'
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-purple-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-4 h-4 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                     </svg>
@@ -301,27 +301,27 @@ export default function ApplePodcastMockup({
                   </span>
                   {highlightAction && (
                     <span className="flex h-2.5 w-2.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-600"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/50 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
                     </span>
                   )}
                 </button>
 
                 {/* Menu Item 2: New Station */}
-                <div className="p-3.5 text-sm text-neutral-700 dark:text-neutral-300 opacity-70">
+                <div className="p-3.5 text-sm text-neutral-700 opacity-70">
                   {isZh ? '新建电台' : 'New Station'}
                 </div>
 
                 {/* Menu Item 3: Edit Library */}
-                <div className="p-3.5 text-sm text-neutral-700 dark:text-neutral-300 opacity-70">
+                <div className="p-3.5 text-sm text-neutral-700 opacity-70">
                   {isZh ? '编辑资料库' : 'Edit Library'}
                 </div>
               </div>
 
               {/* Step 2 Callout Indicator */}
               {highlightAction && (
-                <div className="mt-4 self-end max-w-[240px] bg-purple-600 text-white text-xs font-semibold py-2 px-3 rounded-2xl shadow-2xl flex items-center gap-2 animate-pulse">
-                  <span className="bg-white text-purple-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                <div className="mt-4 self-end max-w-[240px] bg-primary text-primary-content text-xs font-semibold py-2 px-3 rounded-2xl shadow-2xl flex items-center gap-2 animate-pulse">
+                  <span className="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">2</span>
                   <span>{isZh ? '选择「通过 URL 关注节目...」' : 'Tap "Follow a Show by URL..."'}</span>
                 </div>
               )}
@@ -331,12 +331,12 @@ export default function ApplePodcastMockup({
           {/* OVERLAY: Step 3 Add Podcast Modal Dialog */}
           {step === 3 && (
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center px-4 transition-all">
-              <div className="w-full max-w-[290px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-2xl rounded-3xl p-5 shadow-2xl border border-white/40 dark:border-neutral-700 text-center animate-in fade-in zoom-in-95 duration-150">
+              <div className="w-full max-w-[290px] bg-white/95 backdrop-blur-2xl rounded-3xl p-5 shadow-2xl border border-white/40 text-center animate-in fade-in zoom-in-95 duration-150">
                 
-                <h3 className="text-lg font-bold tracking-tight text-neutral-900 dark:text-white">
+                <h3 className="text-lg font-bold tracking-tight text-neutral-900">
                   {isZh ? '添加播客' : 'Add Podcast'}
                 </h3>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 mb-4">
+                <p className="text-xs text-neutral-500 mt-1 mb-4">
                   {isZh ? '通过 URL 关注节目' : 'Follow a show by URL'}
                 </p>
 
@@ -347,21 +347,21 @@ export default function ApplePodcastMockup({
                     readOnly
                     value={rssUrl}
                     placeholder={isZh ? '播客 URL' : 'Podcast URL'}
-                    className="w-full text-xs px-3 py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-700/80 border border-purple-400 focus:outline-none text-purple-700 dark:text-purple-300 font-mono truncate select-all shadow-inner"
+                    className="w-full text-xs px-3 py-2.5 rounded-xl bg-neutral-100 border border-primary/60 focus:outline-none text-primary font-mono truncate select-all shadow-inner"
                   />
                   {rssUrl && (
-                    <div className="absolute right-2 top-2 text-[10px] bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded font-sans font-bold">
+                    <div className="absolute right-2 top-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-sans font-bold">
                       RSS
                     </div>
                   )}
                 </div>
 
                 {/* Buttons: Cancel & Follow */}
-                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-200/80 dark:border-neutral-700">
+                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-200/80">
                   <button
                     type="button"
                     onClick={() => handleNextStep(2)}
-                    className="w-full py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl transition-colors"
+                    className="w-full py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors"
                   >
                     {isZh ? '取消' : 'Cancel'}
                   </button>
@@ -369,7 +369,7 @@ export default function ApplePodcastMockup({
                   <button
                     type="button"
                     onClick={() => handleNextStep(1)}
-                    className="w-full py-2 text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all shadow-md active:scale-95"
+                    className="w-full py-2 text-sm font-bold text-primary-content bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-md active:scale-95"
                   >
                     {isZh ? '关注' : 'Follow'}
                   </button>
@@ -377,8 +377,8 @@ export default function ApplePodcastMockup({
 
                 {/* Step 3 Callout Indicator */}
                 {highlightAction && (
-                  <div className="mt-3 bg-purple-600 text-white text-xs font-semibold py-1.5 px-2.5 rounded-xl shadow-lg flex items-center justify-center gap-1.5">
-                    <span className="bg-white text-purple-700 rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
+                  <div className="mt-3 bg-primary text-primary-content text-xs font-semibold py-1.5 px-2.5 rounded-xl shadow-lg flex items-center justify-center gap-1.5">
+                    <span className="bg-white text-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
                     <span>{isZh ? '粘贴链接后点击「关注」' : 'Paste RSS URL & tap Follow'}</span>
                   </div>
                 )}
@@ -389,7 +389,7 @@ export default function ApplePodcastMockup({
 
           {/* iOS Bottom Home Bar */}
           <div className="py-1 flex justify-center z-40">
-            <div className="w-32 h-1 bg-neutral-400/60 dark:bg-neutral-600/60 rounded-full"></div>
+            <div className="w-32 h-1 bg-neutral-400/60 rounded-full"></div>
           </div>
 
         </div>

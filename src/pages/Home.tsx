@@ -7,10 +7,9 @@ export default function Home() {
             <Header hideSearchBtn={true} >
                 <div className="mt-28">
                     <div className="w-full flex justify-center">
-                        <img src="/porkast-text-logo-white.jpg" className="w-96 dark:block hidden" />
-                        <img src="/porkast-text-logo-black.jpg" className="w-96 dark:hidden block" />
+                        <img src="/porkast-text-logo-black.jpg" className="w-96 block" />
                     </div>
-                    <div className="md:text-5xl text-2xl font-semibold flex justify-center w-full italic text-center dark:text-white text-black">
+                    <div className="md:text-5xl text-2xl font-semibold flex justify-center w-full italic text-center text-black">
                         Discover, Subscribe, Share
                     </div>
                     <div className="md:text-4xl text-xl text-primary font-bold flex justify-center w-full italic text-center mt-9">
@@ -27,8 +26,8 @@ export default function Home() {
                 <div className="mt-12 flex justify-center">
                     <div className="rounded-lg p-6 max-w-md text-center">
                         <div className="text-3xl mb-3">📱</div>
-                        <h3 className="font-semibold text-lg mb-2 dark:text-white text-black">Porkast for iOS</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                        <h3 className="font-semibold text-lg mb-2 text-black">Porkast for iOS</h3>
+                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                             Discover podcasts, manage subscriptions, and listen on the go with our native iOS app.
                         </p>
                         <a
@@ -48,8 +47,8 @@ export default function Home() {
                 <div className="mt-4 mb-8 flex justify-center">
                     <div className="rounded-lg p-6 max-w-md text-center">
                         <div className="text-3xl mb-3">🚀</div>
-                        <h3 className="font-semibold text-lg mb-2 dark:text-white text-black">Also Available on Telegram!</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                        <h3 className="font-semibold text-lg mb-2 text-black">Also Available on Telegram!</h3>
+                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                             Discover podcasts, manage subscriptions, and share episodes - all from Telegram.
                         </p>
                         <a
