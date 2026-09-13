@@ -73,7 +73,7 @@ function GuideContent() {
         <div className="bg-base-200/80 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-lg border border-base-300 mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-base-300 pb-6 mb-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 text-xs font-bold mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3">
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2zm4 8h-2v-4h2v4zm0-6h-2V7h2v4z" />
                 </svg>
@@ -207,11 +207,11 @@ function GuideContent() {
             <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-6">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-10 h-10 rounded-2xl bg-purple-600 text-white font-black text-lg flex items-center justify-center shadow-md">
+                  <span className="w-10 h-10 rounded-2xl bg-primary text-primary-content font-black text-lg flex items-center justify-center shadow-md">
                     {currentStep}
                   </span>
                   <div>
-                    <div className="text-xs uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+                    <div className="text-xs uppercase tracking-widest text-primary font-bold">
                       {isZh ? `第 ${currentStep} 步 (共 3 步)` : `Step ${currentStep} of 3`}
                     </div>
                     <h2 className="text-xl sm:text-2xl font-bold">
@@ -226,7 +226,7 @@ function GuideContent() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/60 text-purple-800 dark:text-purple-200 text-xs sm:text-sm flex items-start gap-2.5">
+                <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 text-primary text-xs sm:text-sm flex items-start gap-2.5">
                   <span className="text-base">💡</span>
                   <span>{stepsData[currentStep - 1].actionTip}</span>
                 </div>
@@ -249,7 +249,7 @@ function GuideContent() {
                       key={s}
                       onClick={() => setCurrentStep(s as GuideStep)}
                       className={`w-3 h-3 rounded-full cursor-pointer transition-all ${
-                        currentStep === s ? 'bg-purple-600 scale-125' : 'bg-base-content/20'
+                        currentStep === s ? 'bg-primary scale-125' : 'bg-base-content/20'
                       }`}
                     />
                   ))}
@@ -277,7 +277,7 @@ function GuideContent() {
                 <div key={s} className="bg-base-200/60 rounded-3xl p-5 border border-base-300 shadow-md flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="w-7 h-7 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
+                      <span className="w-7 h-7 rounded-xl bg-primary text-primary-content font-bold text-sm flex items-center justify-center shrink-0">
                         {s}
                       </span>
                       <h3 className="font-bold text-sm line-clamp-1">{stepInfo.title}</h3>
