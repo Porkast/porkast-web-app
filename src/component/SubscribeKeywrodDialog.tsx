@@ -132,15 +132,15 @@ const SubscribeKeywrodDialog = forwardRef<SubscribeKeywrodDialogRef>((_props, re
                     }
                     <p className="mt-4 text-gray-500">You will be notified of any updates to the search results. Stay tuned for the latest content!</p>
                     {showUpgradeHint && (
-                        <div className="alert alert-warning mt-4 flex-wrap">
+                        <div className="alert alert-warning mt-4 flex justify-between items-center gap-4">
                             <span>You reached your keyword limit. Upgrade to add more keywords.</span>
                             {PAYMENTS_ENABLED ? (
-                                <Link to="/pricing" className="btn btn-sm btn-primary" onClick={() => {
+                                <Link to="/pricing" className="btn btn-sm btn-primary whitespace-nowrap shrink-0" onClick={() => {
                                     const dialog = document.getElementById('search_keyword_modal') as HTMLDialogElement;
                                     dialog?.close()
                                 }}>Upgrade</Link>
                             ) : (
-                                <span className="badge badge-outline">Upgrade coming soon</span>
+                                <span className="badge badge-outline whitespace-nowrap shrink-0">Upgrade coming soon</span>
                             )}
                         </div>
                     )}
