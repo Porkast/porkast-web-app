@@ -78,9 +78,9 @@ export default function SearchPage() {
                     <div className="w-full flex justify-center pl-6 pr-6">
                         <div className="w-full max-w-2xl">
                             {blockedQuery ? (
-                                <div className="alert alert-warning flex-wrap">
+                                <div className="alert alert-warning flex justify-between items-center gap-4">
                                     <span>This search term is not allowed by our Content Policy. Adult and prohibited content is filtered from Porkast.</span>
-                                    <Link to="/content-policy" className="btn btn-sm btn-primary">Content Policy</Link>
+                                    <Link to="/content-policy" className="btn btn-sm btn-primary whitespace-nowrap shrink-0">Content Policy</Link>
                                 </div>
                             ) : (
                                 <>
