@@ -6,7 +6,7 @@ import Footer from '../../component/Footer'
 import Header from '../../component/Header'
 import { AvatarImage } from '../../component/PorkastImage'
 import { SharePlaylistBtn } from '../../component/Share'
-import { getUserSessionInfo } from '../../libs/User'
+import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../../libs/User'
 import { getPlaylistInfoById, getPlaylistItemListByUserId } from '../../libs/Playlist'
 import type { FeedItem } from '../../types/feed_item'
 import type { UserPlaylistDto } from '../../types/playlist'
@@ -28,17 +28,20 @@ export default function PlaylistDetailPage() {
     useEffect(() => {
         if (!userId || !playlistId) return
         const fetchData = async () => {
-            const [plResp, itemResp, sessionUser] = await Promise.all([
+            const [plResp, itemResp, sessionUser, userResp] = await Promise.all([
                 getPlaylistInfoById(playlistId),
                 getPlaylistItemListByUserId(userId, playlistId, page),
                 getUserSessionInfo(),
+                getUserInfoFromServer(userId),
             ])
             if (userId === sessionUser.userId) {
                 setIsMyPage(true)
             }
+            if (userResp.code === 0 && userResp.data) {
+                setNickname(getTempNickname(userResp.data))
+            }
             if (plResp.code === 0 && plResp.data) {
                 setPlaylistInfo(plResp.data)
-                setNickname('')
             }
             if (itemResp.code === 0) {
                 setItemList(itemResp.data)

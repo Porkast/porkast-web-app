@@ -6,8 +6,8 @@ import Header from '../../component/Header'
 import { AvatarImage } from '../../component/PorkastImage'
 import UnsubscribeKeywordButton from '../../component/UnsubscribeKeywordButton'
 import { formatDateTime } from '../../libs/Common'
-import { getUserSubscriptionList, getUserAllSubscriptionItems } from '../../libs/Subscription'
-import { getUserInfoFromServer } from '../../libs/User'
+import { getUserSubscriptionList, getUserAllSubscriptionItems, SUBSCRIPTION_FEED_PAGE_SIZE } from '../../libs/Subscription'
+import { getTempNickname, getUserInfoFromServer } from '../../libs/User'
 import type { SubscriptionDataDto } from '../../types/subscription'
 import type { FeedItem } from '../../types/feed_item'
 import SubscriptionFeedList from './SubscriptionFeedList'
@@ -40,10 +40,10 @@ export default function SubscriptionPage() {
             const [userResp, subResp, feedResp] = await Promise.all([
                 getUserInfoFromServer(userId),
                 getUserSubscriptionList(userId),
-                getUserAllSubscriptionItems(userId, 0, 10),
+                getUserAllSubscriptionItems(userId, 0, SUBSCRIPTION_FEED_PAGE_SIZE),
             ])
             if (userResp.code === 0 && userResp.data) {
-                setNickname(userResp.data.email?.split('@')[0] || '')
+                setNickname(getTempNickname(userResp.data))
             }
             if (subResp.code === 0) {
                 setSubscriptionList(subResp.data)
@@ -53,7 +53,7 @@ export default function SubscriptionPage() {
             }
             if (feedResp.code === 0) {
                 setInitialFeedItems(feedResp.data)
-                setFeedTotalCount(feedResp.data.length)
+                setFeedTotalCount(feedResp.data[0]?.Count ?? feedResp.data.length)
             }
             setLoading(false)
         }

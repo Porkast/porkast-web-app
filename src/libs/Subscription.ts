@@ -3,6 +3,8 @@ import type { JsonResponse } from "../types/api";
 import type { SubscriptionDataDto } from "../types/subscription";
 import { API_URL } from "./Constants";
 
+export const SUBSCRIPTION_FEED_PAGE_SIZE = 10
+
 export const subscribeSearchKeyword = async (userId: string, searchKeyword: string, country: string = 'US', source: string = 'itunes', excludeFeedId: string = '', token: string): Promise<JsonResponse> => {
     const apiUrl = `${API_URL}/subscribe/keyword`
     const resp = await fetch(apiUrl, {

@@ -5,6 +5,7 @@ import { AppProvider } from '../../component/AppContext'
 import Header from '../../component/Header'
 import { formatDateTime } from '../../libs/Common'
 import { getUserPlaylistByUserId } from '../../libs/Playlist'
+import { getTempNickname, getUserInfoFromServer } from '../../libs/User'
 import type { UserPlaylistDto } from '../../types/playlist'
 import { EditPlaylistInfoBtn } from '../../component/EditPlaylistInfo'
 import Footer from '../../component/Footer'
@@ -24,7 +25,13 @@ export default function PlaylistPage() {
     useEffect(() => {
         if (!userId) return
         const fetchData = async () => {
-            const plResp = await getUserPlaylistByUserId(userId, page)
+            const [plResp, userResp] = await Promise.all([
+                getUserPlaylistByUserId(userId, page),
+                getUserInfoFromServer(userId),
+            ])
+            if (userResp.code === 0 && userResp.data) {
+                setNickname(getTempNickname(userResp.data))
+            }
             if (plResp.code === 0) {
                 setPlaylists(plResp.data || [])
                 if (plResp.data && plResp.data.length > 0) {

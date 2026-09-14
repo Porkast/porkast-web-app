@@ -7,7 +7,7 @@ import Header from '../component/Header'
 import { AvatarImage } from '../component/PorkastImage'
 import { SharedListenLaterBtn } from '../component/Share'
 import { convertMillsTimeToDuration } from '../libs/Common'
-import { getUserSessionInfo } from '../libs/User'
+import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../libs/User'
 import { getListenLaterListByUserId } from '../libs/ListenLater'
 import type { UserListenLaterDto } from '../types/listen_later'
 import Loading from '../component/Loading'
@@ -27,12 +27,16 @@ export default function ListenLaterPage() {
     useEffect(() => {
         if (!userId) return
         const fetchData = async () => {
-            const [llResp, sessionUser] = await Promise.all([
+            const [llResp, sessionUser, userResp] = await Promise.all([
                 getListenLaterListByUserId(userId, page),
                 getUserSessionInfo(),
+                getUserInfoFromServer(userId),
             ])
             if (userId === sessionUser.userId) {
                 setIsMyPage(true)
+            }
+            if (userResp.code === 0 && userResp.data) {
+                setNickname(getTempNickname(userResp.data))
             }
             if (llResp.code === 0) {
                 setItemList(llResp.data)
