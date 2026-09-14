@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import EpisodeCard from "../../component/EpisodeCard"
 import type { FeedItem } from "../../types/feed_item"
-import { getUserAllSubscriptionItems } from "../../libs/Subscription"
+import { getUserAllSubscriptionItems, SUBSCRIPTION_FEED_PAGE_SIZE } from "../../libs/Subscription"
 
 type Props = {
     userId: string
@@ -12,53 +12,21 @@ type Props = {
 export default function SubscriptionFeedList({ userId, initialItems, initialTotalCount }: Props) {
 
     const [items, setItems] = useState<FeedItem[]>(initialItems)
-    const [hasMore, setHasMore] = useState(initialItems.length === 10)
     const [loading, setLoading] = useState(false)
+    const [hasMore, setHasMore] = useState(initialTotalCount > SUBSCRIPTION_FEED_PAGE_SIZE)
 
-    const sentinelRef = useRef<HTMLDivElement>(null)
-    const offsetRef = useRef(initialItems.length)
-    const loadingRef = useRef(false)
-    const hasMoreRef = useRef(initialItems.length === 10)
-
-    useEffect(() => {
-        loadingRef.current = loading
-    }, [loading])
-
-    useEffect(() => {
-        hasMoreRef.current = hasMore
-    }, [hasMore])
-
-    useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && hasMoreRef.current && !loadingRef.current) {
-                loadMore()
-            }
-        }, { threshold: 0.1 })
-
-        const sentinel = sentinelRef.current
-        if (sentinel) {
-            observer.observe(sentinel)
-        }
-
-        return () => {
-            observer.disconnect()
-        }
-    }, [])
+    const offsetRef = useRef(SUBSCRIPTION_FEED_PAGE_SIZE)
 
     const loadMore = async () => {
+        if (loading) return
         setLoading(true)
-        loadingRef.current = true
-        const resp = await getUserAllSubscriptionItems(userId, offsetRef.current, 10)
-        if (resp.code === 0 && resp.data.length > 0) {
-            setItems(prev => [...prev, ...resp.data])
-            offsetRef.current += resp.data.length
-            if (resp.data.length < 10) {
-                setHasMore(false)
-                hasMoreRef.current = false
+        const resp = await getUserAllSubscriptionItems(userId, offsetRef.current, SUBSCRIPTION_FEED_PAGE_SIZE)
+        if (resp.code === 0) {
+            if (resp.data.length > 0) {
+                setItems(prev => [...prev, ...resp.data])
             }
-        } else {
-            setHasMore(false)
-            hasMoreRef.current = false
+            offsetRef.current += SUBSCRIPTION_FEED_PAGE_SIZE
+            setHasMore(offsetRef.current < initialTotalCount)
         }
         setLoading(false)
     }
@@ -91,13 +59,14 @@ export default function SubscriptionFeedList({ userId, initialItems, initialTota
                 })
             }
             {
-                loading && (
-                    <div className="flex justify-center py-6">
-                        <span className="loading loading-spinner loading-md"></span>
+                hasMore && (
+                    <div className="flex justify-center pt-6">
+                        <button className="btn btn-neutral" onClick={loadMore} disabled={loading}>
+                            {loading ? <span className="loading loading-spinner loading-sm"></span> : 'Load more'}
+                        </button>
                     </div>
                 )
             }
-            <div ref={sentinelRef} className="h-4" />
             {
                 !hasMore && items.length > 0 && (
                     <div className="text-center text-neutral-500 text-sm py-6">No more episodes</div>

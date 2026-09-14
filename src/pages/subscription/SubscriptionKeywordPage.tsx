@@ -8,7 +8,7 @@ import { AvatarImage } from '../../component/PorkastImage'
 import { ShareSearchSubscriptionBtn } from '../../component/Share'
 import SubscribeListenLaterBtn from '../../component/SubscribeListenLaterButton'
 import UnsubscribeKeywordButton from '../../component/UnsubscribeKeywordButton'
-import { getUserSessionInfo } from '../../libs/User'
+import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../../libs/User'
 import { getUserKeywordSubscriptionItemList } from '../../libs/Subscription'
 import type { FeedItem } from '../../types/feed_item'
 import Loading from '../../component/Loading'
@@ -30,12 +30,16 @@ export default function SubscriptionKeywordPage() {
     useEffect(() => {
         if (!userId || !keyword) return
         const fetchData = async () => {
-            const [subResp, sessionUser] = await Promise.all([
+            const [subResp, sessionUser, userResp] = await Promise.all([
                 getUserKeywordSubscriptionItemList(userId, decodedKeyword, String(page)),
                 getUserSessionInfo(),
+                getUserInfoFromServer(userId),
             ])
             if (userId === sessionUser.userId) {
                 setIsMyPage(true)
+            }
+            if (userResp.code === 0 && userResp.data) {
+                setNickname(getTempNickname(userResp.data))
             }
             if (subResp.code === 0) {
                 setItemList(subResp.data)
