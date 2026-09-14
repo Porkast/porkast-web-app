@@ -89,9 +89,21 @@ const BLOCKED_PHRASES = [
     '成人游戏',
     '福利姬',
     '援助交际',
+    '乱伦',
+    '自慰',
+    '打飞机',
+    '口交',
+    '肛交',
+    '群交',
+    'adult audio',
+    'erotic audio',
+    'erotic story',
+    'erotic stories',
+    'erotica',
+    'sensual massage',
 ]
 
-const BLOCKED_WORDS = ['porno', 'nudes', 'escort', 'hookup']
+const BLOCKED_WORDS = ['porno', 'nudes', 'nude', 'escort', 'hookup', 'erotica', 'incest', 'intercourse', 'anal']
 
 const BLOCKED_CATEGORIES = ['sexuality', 'adult', 'erotic', 'pornography', 'nsfw', 'sex', 'mature']
 
@@ -99,9 +111,12 @@ function normalize(value?: string | null): string {
     return (value || '').toLowerCase()
 }
 
-export function isExplicitFlag(value?: string | boolean | null): boolean {
+export function isExplicitFlag(value?: string | boolean | number | null): boolean {
     if (value === true) {
         return true
+    }
+    if (typeof value === 'number') {
+        return value > 0
     }
     const normalized = normalize(String(value ?? ''))
     return normalized === 'true' || normalized === 'yes' || normalized === 'explicit' || normalized === '1'
@@ -140,10 +155,13 @@ export interface ContentCheckInput {
     channelTitle?: string | null
     description?: string | null
     categories?: string[] | null
-    explicit?: string | boolean | null
+    explicit?: string | boolean | number | null
 }
 
 export function isBlockedContent(input: ContentCheckInput): boolean {
+    if (isExplicitFlag(input.explicit)) {
+        return true
+    }
     if (isBlockedCategory(input.categories)) {
         return true
     }

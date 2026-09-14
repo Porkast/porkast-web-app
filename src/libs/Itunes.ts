@@ -49,7 +49,7 @@ interface RssFeed {
 }
 
 export const searchPodcastEpisodeFromItunes = async (q: string, entity: string, country: string, excludeFeedId: string, offset: number, limit: number, totalCount: number): Promise<FeedItem[]> => {
-    const res = await fetch(`https://itunes.apple.com/search?term=${q}&entity=${entity}&media=podcast&country=${country}&limit=${totalCount}`)
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&entity=${entity}&media=podcast&country=${country}&limit=${totalCount}&explicit=No`)
     const jsonResp = await res.json()
     var items: FeedItem[] = []
     const excludeFeedIdList = excludeFeedId.split(',')

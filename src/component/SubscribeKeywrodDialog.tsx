@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import { PAYMENTS_ENABLED } from "../libs/Constants"
 import { useAppContext } from "./AppContext"
 import { MsgAlertType } from "./MsgAlert"
+import { isBlockedSearchQuery } from "../libs/contentFilter"
 import type { FeedChannel } from "../types/feed_channel"
 
 export type SubscribeKeywrodDialogRef = {
@@ -73,6 +74,10 @@ const SubscribeKeywrodDialog = forwardRef<SubscribeKeywrodDialogRef>((_props, re
 
     const doSubscribeSearchKeyword = async () => {
         if (isSubscribeLoading) {
+            return
+        }
+        if (isBlockedSearchQuery(searchKeywrod)) {
+            appContext.showMsgAlert('Subscription keyword violates content policy', MsgAlertType.FAILED)
             return
         }
         setIsSubscribeLoading(true)
