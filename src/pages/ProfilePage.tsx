@@ -4,7 +4,7 @@ import { AppProvider } from '../component/AppContext'
 import Footer from '../component/Footer'
 import Header from '../component/Header'
 import { getUserSessionInfo, getUserInfoFromServer, updateNicknameToServer, setUserSessionInfo } from '../libs/User'
-import { formatKeywordUsage, formatTier, getUserMembershipStatus } from '../libs/Membership'
+import { APPLE_SUBSCRIPTIONS_URL, formatKeywordUsage, formatTier, getUserMembershipStatus } from '../libs/Membership'
 import type { MembershipStatusResult } from '../types/membership'
 import Loading from '../component/Loading'
 
@@ -126,13 +126,27 @@ export default function ProfilePage() {
                                                     {membership.willRenew ? 'Renews' : 'Expires'}: {new Date(membership.expiresDate).toLocaleDateString()}
                                                 </div>
                                             )}
+                                            {membership.provider === 'appstore' && (
+                                                <div className="text-xs text-gray-400 mt-1">Subscribed via the App Store</div>
+                                            )}
                                         </div>
-                                        <Link
-                                            to="/pricing"
-                                            className="btn btn-primary btn-sm"
-                                        >
-                                            {membership.isActive && membership.tier !== 'free' ? 'Manage' : 'Upgrade'}
-                                        </Link>
+                                        {membership.isActive && membership.tier !== 'free' && membership.provider === 'appstore' ? (
+                                            <a
+                                                href={APPLE_SUBSCRIPTIONS_URL}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="btn btn-primary btn-sm"
+                                            >
+                                                Manage in App Store
+                                            </a>
+                                        ) : (
+                                            <Link
+                                                to="/pricing"
+                                                className="btn btn-primary btn-sm"
+                                            >
+                                                {membership.isActive && membership.tier !== 'free' ? 'Manage' : 'Upgrade'}
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             )}
