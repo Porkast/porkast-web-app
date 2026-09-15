@@ -5,6 +5,7 @@ export type MembershipPlan = 'pro' | 'unlimited'
 export interface MembershipStatusResult {
     tier: MembershipTier
     productId: string | null
+    provider: string | null
     expiresDate: string | null
     isActive: boolean
     willRenew: boolean
@@ -16,4 +17,5 @@ export interface MembershipCheckoutResult {
     checkoutUrl: string | null
     alreadySubscribed: boolean
     currentPlan: MembershipPlan | null
+    provider: string | null
 }

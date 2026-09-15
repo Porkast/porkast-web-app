@@ -12,9 +12,12 @@ export const TIER_KEYWORDS_LIMIT: Record<MembershipTier, number | null> = {
     unlimited: null,
 }
 
+export const APPLE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions'
+
 const EMPTY_FREE_STATUS: MembershipStatusResult = {
     tier: 'free',
     productId: null,
+    provider: null,
     expiresDate: null,
     isActive: false,
     willRenew: false,
@@ -47,6 +50,7 @@ export async function getUserMembershipStatus(userId: string): Promise<Membershi
             return {
                 tier,
                 productId: respJson.data.productId || null,
+                provider: respJson.data.provider || null,
                 expiresDate: respJson.data.expiresDate || null,
                 isActive: respJson.data.isActive || false,
                 willRenew: respJson.data.willRenew || false,

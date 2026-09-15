@@ -5,6 +5,7 @@ import Footer from '../component/Footer'
 import Header from '../component/Header'
 import { MsgAlertType } from '../component/MsgAlert'
 import {
+    APPLE_SUBSCRIPTIONS_URL,
     createMembershipCheckout,
     formatKeywordUsage,
     formatTier,
@@ -170,7 +171,12 @@ function PricingContent() {
         }
 
         if (resp.data?.alreadySubscribed) {
-            appContext.showMsgAlert('You already have an active subscription. Use Manage subscription to change it.', MsgAlertType.INFO)
+            appContext.showMsgAlert(
+                resp.data.provider === 'appstore'
+                    ? 'You have an active App Store subscription. Manage it from your Apple ID settings.'
+                    : 'You already have an active subscription. Use Manage subscription to change it.',
+                MsgAlertType.INFO
+            )
             const result = await loadStatus()
             if (result) {
                 setStatus(result)
@@ -185,6 +191,10 @@ function PricingContent() {
         const session = await getUserSessionInfo()
         if (!session.userId) {
             navigate('/signin')
+            return
+        }
+        if (status?.provider === 'appstore') {
+            window.location.href = APPLE_SUBSCRIPTIONS_URL
             return
         }
         setPortalLoading(true)
@@ -236,7 +246,9 @@ function PricingContent() {
                     disabled={portalLoading}
                     onClick={handleManage}
                 >
-                    {portalLoading ? <span className="loading loading-spinner"></span> : 'Change plan'}
+                    {portalLoading
+                        ? <span className="loading loading-spinner"></span>
+                        : status?.provider === 'appstore' ? 'Manage in App Store' : 'Change plan'}
                 </button>
             )
         }
@@ -284,6 +296,9 @@ function PricingContent() {
                                 <div className="text-sm text-gray-500">Current plan</div>
                                 <div className="text-xl font-bold">{formatTier(status.tier)}</div>
                                 <div className="text-sm text-gray-500 mt-1">{formatKeywordUsage(status)}</div>
+                                {status.provider === 'appstore' && (
+                                    <div className="text-sm text-gray-500 mt-1">Subscribed via the App Store</div>
+                                )}
                                 {!status.willRenew && (
                                     <div className="text-sm text-warning mt-1">Renewal cancelled — access until expiry</div>
                                 )}
@@ -293,7 +308,9 @@ function PricingContent() {
                                 disabled={portalLoading}
                                 onClick={handleManage}
                             >
-                                {portalLoading ? <span className="loading loading-spinner"></span> : 'Manage subscription'}
+                                {portalLoading
+                                    ? <span className="loading loading-spinner"></span>
+                                    : status.provider === 'appstore' ? 'Manage in App Store' : 'Manage subscription'}
                             </button>
                         </div>
                     </div>
