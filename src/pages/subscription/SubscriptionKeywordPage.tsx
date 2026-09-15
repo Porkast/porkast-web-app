@@ -10,6 +10,7 @@ import SubscribeListenLaterBtn from '../../component/SubscribeListenLaterButton'
 import UnsubscribeKeywordButton from '../../component/UnsubscribeKeywordButton'
 import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../../libs/User'
 import { getUserKeywordSubscriptionItemList } from '../../libs/Subscription'
+import { smoothScrollToTop } from '../../libs/Common'
 import type { FeedItem } from '../../types/feed_item'
 import Loading from '../../component/Loading'
 
@@ -111,7 +112,7 @@ export default function SubscriptionKeywordPage() {
                                 <div className="join">
                                     {
                                         page > 1 ? (
-                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/${keyword}?page=${prevPage}`}>«</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/${keyword}?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">«</button>
                                         )
@@ -119,7 +120,7 @@ export default function SubscriptionKeywordPage() {
                                     <button className="join-item btn btn-neutral">Page {page}</button>
                                     {
                                         page < totalPageCalc ? (
-                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/${keyword}?page=${nextPage}`}>»</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/${keyword}?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">»</button>
                                         )

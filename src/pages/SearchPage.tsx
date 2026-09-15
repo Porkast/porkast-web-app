@@ -11,6 +11,7 @@ import { searchPodcastEpisodeFromItunes } from '../libs/Itunes'
 import { useRef } from 'react'
 import { SkeletonSearchEpisodeView } from '../component/SkeletonView'
 import { isBlockedSearchQuery } from '../libs/contentFilter'
+import { smoothScrollToTop } from '../libs/Common'
 
 enum Page {
     NextPage,
@@ -127,7 +128,7 @@ export default function SearchPage() {
                         <div className="join">
                             {
                                 isPreBtnClickable ? (
-                                    <Link className="join-item btn btn-neutral" to={prevPageUrl}>«</Link>
+                                    <Link className="join-item btn btn-neutral" to={prevPageUrl} onClick={() => smoothScrollToTop()}>«</Link>
                                 ) : (
                                     <button className="join-item btn btn-neutral btn-disabled">«</button>
                                 )
@@ -135,7 +136,7 @@ export default function SearchPage() {
                             <button className="join-item btn btn-neutral">Page {page}</button>
                             {
                                 isNextBtnClickable ? (
-                                    <Link className="join-item btn btn-neutral" to={nextPageUrl}>»</Link>
+                                    <Link className="join-item btn btn-neutral" to={nextPageUrl} onClick={() => smoothScrollToTop()}>»</Link>
                                 ) : (
                                     <button className="join-item btn btn-neutral btn-disabled">»</button>
                                 )
