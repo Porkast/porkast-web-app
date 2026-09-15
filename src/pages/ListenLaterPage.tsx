@@ -6,7 +6,7 @@ import Footer from '../component/Footer'
 import Header from '../component/Header'
 import { AvatarImage } from '../component/PorkastImage'
 import { SharedListenLaterBtn } from '../component/Share'
-import { convertMillsTimeToDuration } from '../libs/Common'
+import { convertMillsTimeToDuration, smoothScrollToTop } from '../libs/Common'
 import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../libs/User'
 import { getListenLaterListByUserId } from '../libs/ListenLater'
 import type { UserListenLaterDto } from '../types/listen_later'
@@ -112,7 +112,7 @@ export default function ListenLaterPage() {
                                 <div className="join">
                                     {
                                         page > 1 ? (
-                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${userId}/?page=${prevPage}`}>«</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${userId}/?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">«</button>
                                         )
@@ -120,7 +120,7 @@ export default function ListenLaterPage() {
                                     <button className="join-item btn btn-neutral">Page {page}</button>
                                     {
                                         page < totalPageCalc ? (
-                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${userId}/?page=${nextPage}`}>»</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${userId}/?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">»</button>
                                         )

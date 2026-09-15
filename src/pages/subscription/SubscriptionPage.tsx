@@ -5,7 +5,7 @@ import Footer from '../../component/Footer'
 import Header from '../../component/Header'
 import { AvatarImage } from '../../component/PorkastImage'
 import UnsubscribeKeywordButton from '../../component/UnsubscribeKeywordButton'
-import { formatDateTime } from '../../libs/Common'
+import { formatDateTime, smoothScrollToTop } from '../../libs/Common'
 import { getUserSubscriptionList, getUserAllSubscriptionItems, SUBSCRIPTION_FEED_PAGE_SIZE } from '../../libs/Subscription'
 import { getTempNickname, getUserInfoFromServer } from '../../libs/User'
 import type { SubscriptionDataDto } from '../../types/subscription'
@@ -141,7 +141,7 @@ export default function SubscriptionPage() {
                                 <div className="join">
                                     {
                                         page > 1 ? (
-                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/?page=${prevPage}`}>«</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">«</button>
                                         )
@@ -149,7 +149,7 @@ export default function SubscriptionPage() {
                                     <button className="join-item btn btn-neutral">Page {page}</button>
                                     {
                                         page < totalPageCalc ? (
-                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/?page=${nextPage}`}>»</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">»</button>
                                         )

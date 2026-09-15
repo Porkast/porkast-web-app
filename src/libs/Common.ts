@@ -59,3 +59,22 @@ export const generatePlaylistItemId = async (playlistId: string, itemId: string)
     const uniqueId = uuidv5(playlistId + itemId, uuidv5.DNS);
     return uniqueId
 }
+
+const SCROLL_TO_TOP_DURATION_MS = 800
+
+export const smoothScrollToTop = (duration: number = SCROLL_TO_TOP_DURATION_MS) => {
+    const start = window.scrollY
+    if (start === 0) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        window.scrollTo(0, 0)
+        return
+    }
+    const startTime = performance.now()
+    const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
+    const step = (now: number) => {
+        const progress = Math.min((now - startTime) / duration, 1)
+        window.scrollTo(0, start * (1 - easeInOutQuad(progress)))
+        if (progress < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+}

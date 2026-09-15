@@ -8,6 +8,7 @@ import { AvatarImage } from '../../component/PorkastImage'
 import { SharePlaylistBtn } from '../../component/Share'
 import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../../libs/User'
 import { getPlaylistInfoById, getPlaylistItemListByUserId } from '../../libs/Playlist'
+import { smoothScrollToTop } from '../../libs/Common'
 import type { FeedItem } from '../../types/feed_item'
 import type { UserPlaylistDto } from '../../types/playlist'
 import Loading from '../../component/Loading'
@@ -110,7 +111,7 @@ export default function PlaylistDetailPage() {
                                     <div className="join">
                                         {
                                             page > 1 ? (
-                                                <Link className="join-item btn btn-neutral" to={`/playlist/${userId}/${playlistId}?page=${prevPage}`}>«</Link>
+                                                <Link className="join-item btn btn-neutral" to={`/playlist/${userId}/${playlistId}?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                             ) : (
                                                 <button className="join-item btn btn-neutral btn-disabled">«</button>
                                             )
@@ -118,7 +119,7 @@ export default function PlaylistDetailPage() {
                                         <button className="join-item btn btn-neutral">Page {page}</button>
                                         {
                                             page < totalPageCalc ? (
-                                                <Link className="join-item btn btn-neutral" to={`/playlist/${userId}/${playlistId}?page=${nextPage}`}>»</Link>
+                                                <Link className="join-item btn btn-neutral" to={`/playlist/${userId}/${playlistId}?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                             ) : (
                                                 <button className="join-item btn btn-neutral btn-disabled">»</button>
                                             )

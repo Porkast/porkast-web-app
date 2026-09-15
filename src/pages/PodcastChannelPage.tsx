@@ -5,7 +5,7 @@ import EpisodeCard from '../component/EpisodeCard'
 import Footer from '../component/Footer'
 import { AppProvider } from '../component/AppContext'
 import parse from 'html-react-parser'
-import { addLinkTagToUrl, removeTextColorStyles, replaceWithBr } from '../libs/Common'
+import { addLinkTagToUrl, removeTextColorStyles, replaceWithBr, smoothScrollToTop } from '../libs/Common'
 import { getPodcastAllInfo } from '../libs/Itunes'
 import { AvatarImage } from '../component/PorkastImage'
 import Loading from '../component/Loading'
@@ -150,9 +150,9 @@ export default function PodcastChannelPage() {
                             </div>
                             <div className="w-full flex justify-center pt-6 pb-9">
                                 <div className="join">
-                                    <Link className="join-item btn btn-neutral" to={prevPageUrl}>«</Link>
+                                    <Link className="join-item btn btn-neutral" to={prevPageUrl} onClick={() => smoothScrollToTop()}>«</Link>
                                     <button className="join-item btn btn-neutral">Page {page}</button>
-                                    <Link className="join-item btn btn-neutral" to={nextPageUrl}>»</Link>
+                                    <Link className="join-item btn btn-neutral" to={nextPageUrl} onClick={() => smoothScrollToTop()}>»</Link>
                                 </div>
                             </div>
                             <div className="w-full flex justify-center pb-9">
