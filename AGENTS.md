@@ -103,6 +103,8 @@ Create a `.env` file (copy from `.env.sample`):
 ```bash
 # API Base URL for porkast-svc backend
 VITE_API_BASE_URL=https://api.porkast.com/api
+# Enable the Dodo Payments checkout UI (production sets this in .env.production)
+VITE_PAYMENTS_ENABLED=true
 ```
 
 ### Install Dependencies
