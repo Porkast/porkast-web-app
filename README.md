@@ -58,7 +58,10 @@ Create a `.env` file:
 
 ```bash
 VITE_API_BASE_URL=https://api.porkast.com/api
+VITE_PAYMENTS_ENABLED=true
 ```
+
+`VITE_PAYMENTS_ENABLED` controls the Dodo Payments checkout UI. It is set in `.env.production` for production builds and in `.env.development` for local development; when unset it defaults to disabled.
 
 ### Development
 
