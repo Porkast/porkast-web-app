@@ -1,6 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { unsubscribeKeyword } from "../libs/Subscription";
+import { useUnsubscribeKeyword } from "../hooks/useUnsubscribeKeyword";
 
 type UnsubscribeKeywordButtonProps = {
     userId: string;
@@ -10,36 +8,13 @@ type UnsubscribeKeywordButtonProps = {
 export default function UnsubscribeKeywordButton(props: UnsubscribeKeywordButtonProps) {
 
     const { userId, keyword } = props
-    const [isUnsubscribing, setIsUnsubscribing] = useState(false)
-    const navigate = useNavigate()
-
-    const onUnsubscribeBtnClick = async () => {
-        if (!confirm(`Are you sure you want to unsubscribe from "${decodeURIComponent(keyword)}"?`)) {
-            return
-        }
-
-        setIsUnsubscribing(true)
-        try {
-            const result = await unsubscribeKeyword(userId, decodeURIComponent(keyword))
-
-            if (result.code === 0) {
-                navigate(`/subscription/${userId}`)
-            } else {
-                alert(result.message || 'Failed to unsubscribe. Please try again.')
-            }
-        } catch (error) {
-            console.error('Error unsubscribing:', error)
-            alert('An error occurred while unsubscribing. Please try again.')
-        } finally {
-            setIsUnsubscribing(false)
-        }
-    }
+    const { isUnsubscribing, unsubscribe } = useUnsubscribeKeyword(userId, keyword)
 
     return (
         <>
             <button 
                 className={`btn btn-neutral ml-2 btn-sm flex items-center rounded-lg ${isUnsubscribing ? 'loading' : ''}`} 
-                onClick={onUnsubscribeBtnClick}
+                onClick={unsubscribe}
                 disabled={isUnsubscribing}
             >
                 {isUnsubscribing ? (
