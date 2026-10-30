@@ -1,11 +1,11 @@
-import { useParams, useSearchParams, Link } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { AppProvider } from '../../component/AppContext'
 import Footer from '../../component/Footer'
 import Header from '../../component/Header'
 import { AvatarImage } from '../../component/PorkastImage'
 import { smoothScrollToTop } from '../../libs/Common'
-import { getUserSubscriptionList, getUserAllSubscriptionItems, SUBSCRIPTION_FEED_PAGE_SIZE } from '../../libs/Subscription'
+import { getUserSubscriptionList, getUserAllSubscriptionItems, SUBSCRIPTION_FEED_PAGE_SIZE, SUBSCRIPTION_LIST_PAGE_SIZE } from '../../libs/Subscription'
 import { getTempNickname, getUserInfoFromServer } from '../../libs/User'
 import type { SubscriptionDataDto } from '../../types/subscription'
 import type { FeedItem } from '../../types/feed_item'
@@ -23,8 +23,9 @@ function formatTier(tier: string): string {
 
 export default function SubscriptionPage() {
     const { userId } = useParams()
+    const navigate = useNavigate()
     const [searchParams] = useSearchParams()
-    const page = parseInt(searchParams.get('page') || '1')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1)
 
     const [loading, setLoading] = useState(true)
     const [nickname, setNickname] = useState('')
@@ -39,7 +40,7 @@ export default function SubscriptionPage() {
         const fetchData = async () => {
             const [userResp, subResp, feedResp] = await Promise.all([
                 getUserInfoFromServer(userId),
-                getUserSubscriptionList(userId),
+                getUserSubscriptionList(userId, SUBSCRIPTION_LIST_PAGE_SIZE, (page - 1) * SUBSCRIPTION_LIST_PAGE_SIZE),
                 getUserAllSubscriptionItems(userId, 0, SUBSCRIPTION_FEED_PAGE_SIZE),
             ])
             if (userResp.code === 0 && userResp.data) {
@@ -49,6 +50,11 @@ export default function SubscriptionPage() {
                 setSubscriptionList(subResp.data)
                 if (subResp.data.length > 0) {
                     setTotalCount(subResp.data[0].Count)
+                } else if (page > 1) {
+                    // Requested page is past the end (e.g. after unsubscribing) -> go back to page 1
+                    navigate(`/subscription/${userId}/?page=1`, { replace: true })
+                } else {
+                    setTotalCount(0)
                 }
             }
             if (feedResp.code === 0) {
@@ -58,11 +64,11 @@ export default function SubscriptionPage() {
             setLoading(false)
         }
         fetchData()
-    }, [userId])
+    }, [userId, page, navigate])
 
     if (loading) return <Loading />
 
-    const totalPageCalc = Math.max(1, Math.ceil(totalCount / 10))
+    const totalPageCalc = Math.max(1, Math.ceil(totalCount / SUBSCRIPTION_LIST_PAGE_SIZE))
     const prevPage = page > 1 ? page - 1 : 1
     const nextPage = page < totalPageCalc ? page + 1 : page
 
@@ -92,7 +98,7 @@ export default function SubscriptionPage() {
                                 subscriptionList?.map((item, index) => {
                                     return (
                                         <SubscriptionKeywordCard
-                                            key={item.Keyword || item.RefName || index}
+                                            key={item.Id || item.Keyword || index}
                                             item={item}
                                             userId={userId!}
                                         />
