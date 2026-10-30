@@ -4,13 +4,13 @@ import { AppProvider } from '../../component/AppContext'
 import Footer from '../../component/Footer'
 import Header from '../../component/Header'
 import { AvatarImage } from '../../component/PorkastImage'
-import UnsubscribeKeywordButton from '../../component/UnsubscribeKeywordButton'
-import { formatDateTime, smoothScrollToTop } from '../../libs/Common'
+import { smoothScrollToTop } from '../../libs/Common'
 import { getUserSubscriptionList, getUserAllSubscriptionItems, SUBSCRIPTION_FEED_PAGE_SIZE } from '../../libs/Subscription'
 import { getTempNickname, getUserInfoFromServer } from '../../libs/User'
 import type { SubscriptionDataDto } from '../../types/subscription'
 import type { FeedItem } from '../../types/feed_item'
 import SubscriptionFeedList from './SubscriptionFeedList'
+import SubscriptionKeywordCard from '../../component/SubscriptionKeywordCard'
 import Loading from '../../component/Loading'
 
 function formatTier(tier: string): string {
@@ -90,50 +90,12 @@ export default function SubscriptionPage() {
                             <div className='text-neutral-500 text-sm mb-6 ml-2'>{totalCount} results</div>
                             {
                                 subscriptionList?.map((item, index) => {
-                                    const encodeKeyword = encodeURIComponent(item.Keyword)
                                     return (
-                                        <div key={index} className="card w-full bg-base-100 shadow-xl mb-6">
-                                            <div className="card-body">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex-1">
-                                                        {
-                                                            item.Keyword ? (
-                                                                <h2 className="card-title">
-                                                                    <a href={`/subscription/${userId}/${encodeKeyword}`} className="hover:text-primary">
-                                                                        #{item.Keyword}
-                                                                    </a>
-                                                                </h2>
-                                                            ) : (
-                                                                <h2 className="card-title">{item.RefName}</h2>
-                                                            )
-                                                        }
-                                                        <div className="md:flex block md:justify-start mt-2">
-                                                            {
-                                                                item.UpdateTime != null ? (
-                                                                    <div className="mr-4 md:mb-0 mb-4">Update at: {formatDateTime(item.UpdateTime.toLocaleString())}</div>
-                                                                ) : (
-                                                                    <div>Create at: {formatDateTime(item.CreateTime?.toLocaleString())}</div>
-                                                                )
-                                                            }
-                                                            {
-                                                                item.TotalCount == 0 ? (
-                                                                    <div></div>
-                                                                ) : (
-                                                                    <p>Episodes: {item.TotalCount}</p>
-                                                                )
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                    <div className="card-actions justify-end">
-                                                        {
-                                                            item.Keyword && (
-                                                                <UnsubscribeKeywordButton userId={userId!} keyword={item.Keyword} />
-                                                            )
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <SubscriptionKeywordCard
+                                            key={item.Keyword || item.RefName || index}
+                                            item={item}
+                                            userId={userId!}
+                                        />
                                     )
                                 })
                             }

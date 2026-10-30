@@ -125,10 +125,11 @@ export default function Header(props: HeaderProps) {
                                 <button className="btn btn-xs sm:btn-sm md:btn-md btn-active btn-primary mr-4" onClick={showSearchModal}>Search</button>
                             </div>
                             <div className="flex-none hidden lg:block">
-                                <ul className="menu menu-horizontal">
+                                <ul className="menu menu-horizontal items-center">
+                                    <li><Link to={`/subscription/${userInfo?.userId || ''}`} className="text-xl btn btn-ghost">Subscription</Link></li>
                                     <li><Link to={`/listenlater/${userInfo?.userId || ''}`} className="text-xl btn btn-ghost">Listen Later</Link></li>
                                     <li><Link to={`/playlist/${userInfo?.userId || ''}`} className="text-xl btn btn-ghost">Playlist</Link></li>
-                                    <li><Link to={`/subscription/${userInfo?.userId || ''}`} className="text-xl btn btn-ghost">Subscription</Link></li>
+                                    <li><Link to="/pricing" className="text-xl btn btn-ghost">Pricing</Link></li>
                                     {
                                         props.hideSearchBtn ? (
                                             <></>
@@ -145,7 +146,6 @@ export default function Header(props: HeaderProps) {
                                                     </button>
                                                 </label>
                                                 <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
-                                                    <li><Link to="/pricing" className="text-base">Pricing</Link></li>
                                                     <li><Link to="/profile" className="text-base">Profile</Link></li>
                                                     <li><Link to="/guide/apple-podcast" className="text-base">Subscribe Guide</Link></li>
                                                     <li><Link to="/content-policy" className="text-base">Content Policy</Link></li>
@@ -163,7 +163,6 @@ export default function Header(props: HeaderProps) {
                                                 </ul>
                                             </div>
                                         ) : <>
-                                                    <li><Link to="/pricing" className="text-base btn btn-ghost">Pricing</Link></li>
                                                     <li><Link to="/guide/apple-podcast" className="text-base btn btn-ghost">Guide</Link></li>
                                                     <li><Link to="/content-policy" className="text-base btn btn-ghost">Content Policy</Link></li>
                                                     <li><Link to="/privacy" className="text-base btn btn-ghost">Privacy</Link></li>
