@@ -5,6 +5,8 @@ import { API_URL } from "./Constants";
 
 export const SUBSCRIPTION_FEED_PAGE_SIZE = 10
 
+export const SUBSCRIPTION_LIST_PAGE_SIZE = 10
+
 export const subscribeSearchKeyword = async (userId: string, searchKeyword: string, country: string = 'US', source: string = 'itunes', excludeFeedId: string = '', token: string): Promise<JsonResponse> => {
     const apiUrl = `${API_URL}/subscribe/keyword`
     const resp = await fetch(apiUrl, {
@@ -42,9 +44,10 @@ export const subscribeUserListenLater = async (userId: string, creatorId: string
     return respJson
 }
 
-export const getUserSubscriptionList = async (userId: string): Promise<{ code: number, message: string, data: SubscriptionDataDto[] }> => {
+export const getUserSubscriptionList = async (userId: string, limit: number = SUBSCRIPTION_LIST_PAGE_SIZE, offset: number = 0): Promise<{ code: number, message: string, data: SubscriptionDataDto[] }> => {
     const subscriptionList: SubscriptionDataDto[] = []
-    const resp = await fetch(`${API_URL}/subscribe/list?userId=${userId}`)
+    const params = new URLSearchParams({ userId, limit: String(limit), offset: String(offset) })
+    const resp = await fetch(`${API_URL}/subscribe/list?${params.toString()}`)
     const respJson = await resp.json()
     if (respJson && respJson.data) {
         subscriptionList.push(...respJson.data)
