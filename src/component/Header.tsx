@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getUserSessionInfo, isUserLoggedIn, userSignout } from '../libs/User'
 import { syncToServer } from '../libs/User'
 import type { ServerUserInfo } from '../libs/User'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type HeaderProps = {
     title?: string
@@ -60,20 +60,25 @@ export default function Header(props: HeaderProps) {
         if (dialog) {
             dialog.open = false;
         }
-        if (searchInputVal.length == 0) {
+        const typed = searchInputVal.trim()
+        // Fall back to the keyword the header was opened with when nothing is typed
+        const query = typed.length > 0
+            ? typed
+            : (inputPlaceholderVal !== 'Search' ? inputPlaceholderVal.trim() : '')
+        if (query.length === 0) {
             return
         }
-        if (searchInputVal.length == 0 && inputPlaceholderVal != "Search") {
-            navigate('/search?q=' + inputPlaceholderVal)
-        } else if (searchInputVal.length > 0) {
-            navigate('/search?q=' + searchInputVal)
-        }
+        navigate('/search?q=' + encodeURIComponent(query))
     }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            onSearchButtonClicked()
-        }
+    // Keep the latest handler in a ref so the global listener is registered once
+    const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => { })
+    keyHandlerRef.current = (e: KeyboardEvent) => {
+        if (e.key !== 'Enter') return
+        const dialog = document.getElementById('search_modal') as HTMLDialogElement | null
+        // Only react while the search dialog is open, so Enter elsewhere is left alone
+        if (!dialog || !dialog.open) return
+        onSearchButtonClicked()
     }
 
     const handleLogout = async () => {
@@ -102,8 +107,10 @@ export default function Header(props: HeaderProps) {
     }, [])
 
     useEffect(() => {
-        window.addEventListener('keydown', handleKeyDown)
-    }, [searchInputVal])
+        const listener = (e: KeyboardEvent) => keyHandlerRef.current(e)
+        window.addEventListener('keydown', listener)
+        return () => window.removeEventListener('keydown', listener)
+    }, [])
 
     return (
         <>
