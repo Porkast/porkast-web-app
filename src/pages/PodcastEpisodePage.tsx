@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import Footer from '../component/Footer'
 import Header from '../component/Header'
 import AudioPlayButton from '../component/AudioPlayButton'
-import { AppProvider } from '../component/AppContext'
+import { AppProvider, useAppContext } from '../component/AppContext'
 import AddListenLaterButton from '../component/AddListenLaterButton'
 import AddToPlaylistButton from '../component/AddToPlaylistButton'
 import ShowNotesViewer from '../component/ShowNotesViewer'
@@ -14,9 +14,11 @@ import type { FeedChannel } from '../types/feed_channel'
 import Loading from '../component/Loading'
 import ContentUnavailable from '../component/ContentUnavailable'
 import { CONTENT_REPORT_EMAIL } from '../libs/contentFilter'
+import { feedItemToQueueItem } from '../types/audio_player'
 
 export default function PodcastEpisodePage() {
     const { channelId, itemId } = useParams()
+    const { playEpisode } = useAppContext()
     const [episode, setEpisode] = useState<FeedItem | null>(null)
     const [podcastInfo, setPodcastInfo] = useState<FeedChannel | null>(null)
     const [loadFailed, setLoadFailed] = useState(false)
@@ -48,10 +50,20 @@ export default function PodcastEpisodePage() {
     const formatDescription = removeTextColorStyles(episode.Description)
 
     const playerParams: AudioPlayerParams = {
+        id: episode.GUID || episode.EnclosureUrl,
+        itemId: episode.GUID,
+        channelId: episode.ChannelId,
         title: episode.Title,
-        artist: episode.Author,
-        cover: episode.ImageUrl,
-        src: episode.EnclosureUrl
+        artist: episode.Author || podcastInfo.Title,
+        channelTitle: podcastInfo.Title || episode.ChannelTitle,
+        cover: episode.ImageUrl || podcastInfo.ImageUrl,
+        src: episode.EnclosureUrl,
+        duration: episode.Duration,
+    }
+
+    const queueItem = feedItemToQueueItem(episode, podcastInfo.ImageUrl)
+    if (!queueItem.channelTitle && podcastInfo.Title) {
+        queueItem.channelTitle = podcastInfo.Title
     }
 
     return (
@@ -60,16 +72,16 @@ export default function PodcastEpisodePage() {
                 <div className="w-full flex justify-center mb-9 min-h-screen">
                     <div className='w-full max-w-2xl pl-6 pr-6'>
                         <div className='w-full'>
-                            <div className='text-xl font-bold'>{episode.Title}</div>
+                            <div className='text-xl font-bold break-words'>{episode.Title}</div>
                             <div className="w-full flex justify-start mt-4">
-                                <div className="avatar">
+                                <div className="avatar shrink-0">
                                     <div className="w-24 rounded-xl">
-                                        <img src={episode.ImageUrl} />
+                                        <img src={episode.ImageUrl || podcastInfo.ImageUrl} alt={episode.Title} />
                                     </div>
                                 </div>
-                                <div className="ml-3">
-                                    <a href={podcastChannelLink} className="text-base font-bold mt-2">{podcastInfo.Title}</a>
-                                    <div className="text-sm font-medium text-gray-500 mt-2">By {podcastInfo.Author}</div>
+                                <div className="ml-3 min-w-0 flex-1">
+                                    <a href={podcastChannelLink} className="text-base font-bold mt-2 block break-words">{podcastInfo.Title}</a>
+                                    <div className="text-sm font-medium text-gray-500 mt-2 break-words">By {podcastInfo.Author}</div>
                                     <div className="flex justify-start mt-4">
                                         <a className="btn btn-neutral btn-sm flex items-center rounded-lg md:text-base text-xs" href={episode.FeedLink} target="_blank" rel="noopener noreferrer">
                                             <svg className="md:w-4 md:h-4 w-3 h-3 icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4715" width="32" height="32">
@@ -85,21 +97,31 @@ export default function PodcastEpisodePage() {
                                 </div>
                             </div>
                             <div className="mt-3 text-gray-500">{episode.PubDate}</div>
-                            <div className="md:flex md:justify-start items-center mt-3 pb-6">
+                            <div className="md:flex md:justify-start items-center mt-3 pb-6 flex-wrap gap-y-3">
                                 <div className="flex justify-start items-center">
-                                    <AudioPlayButton data={playerParams} />
-                                    <div className="text-base text-gray-500 w-20 ml-4">{episode.Duration}</div>
+                                    <AudioPlayButton
+                                        data={playerParams}
+                                        onPlay={() => {
+                                            playEpisode(queueItem, {
+                                                items: [queueItem],
+                                                sourceTitle: podcastInfo.Title || episode.ChannelTitle || '',
+                                                sourceKey: `episode:${episode.ChannelId}:${episode.GUID}`,
+                                                hasMore: false,
+                                            })
+                                        }}
+                                    />
+                                    <div className="text-base text-gray-500 w-20 ml-4 whitespace-nowrap">{episode.Duration}</div>
                                 </div>
-                                <div className="flex justify-start items-center md:mt-0 mt-4">
+                                <div className="flex justify-start items-center md:mt-0 mt-4 flex-wrap gap-y-2">
                                     <AddListenLaterButton userId={''} itemId={episode.GUID} channelId={podcastInfo.Id} />
                                     <AddToPlaylistButton itemTitle={podcastInfo.Title} itemId={episode.GUID} channelId={podcastInfo.Id} />
                                 </div>
                             </div>
-                            <p className="mt-4 text-xs">{podcastInfo.Copyright}</p>
+                            <p className="mt-4 text-xs break-words">{podcastInfo.Copyright}</p>
                             <div className="card w-full bg-base-100 shadow-xl overflow-auto mt-9">
                                 <div className="card-body">
                                     <h2 className="card-title mb-9">Show Notes</h2>
-                                    <div className="text-base-content">
+                                    <div className="text-base-content break-words">
                                         <ShowNotesViewer data={{
                                             description: formatDescription
                                         }} />

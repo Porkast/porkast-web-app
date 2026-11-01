@@ -1,17 +1,17 @@
 import { useSearchParams, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import EpisodeCard from '../component/EpisodeCard'
 import Header from '../component/Header'
 import Footer from '../component/Footer'
-import { AppProvider } from '../component/AppContext'
+import { AppProvider, useAppContext } from '../component/AppContext'
 import type { FeedItem } from '../types/feed_item'
 import AddExcludeFeedIdDialog, { AddExcludeFeedIdDialogRef } from '../component/AddExcludeFeedIdDialog'
 import SubscribeKeywrodDialog, { SubscribeKeywrodDialogRef } from '../component/SubscribeKeywrodDialog'
 import { searchPodcastEpisodeFromItunes } from '../libs/Itunes'
-import { useRef } from 'react'
 import { SkeletonSearchEpisodeView } from '../component/SkeletonView'
 import { isBlockedSearchQuery } from '../libs/contentFilter'
 import { smoothScrollToTop } from '../libs/Common'
+import { feedItemToQueueItem } from '../types/audio_player'
 
 enum Page {
     NextPage,
@@ -20,6 +20,7 @@ enum Page {
 
 export default function SearchPage() {
     const [searchParams] = useSearchParams()
+    const { playEpisode, syncSourceQueue } = useAppContext()
     const addExcludeFeedIdDialogRef = useRef<AddExcludeFeedIdDialogRef>(null)
     const subscribeSearchKeywordDialogRef = useRef<SubscribeKeywrodDialogRef>(null)
 
@@ -37,6 +38,11 @@ export default function SearchPage() {
     const [loading, setLoading] = useState(false)
 
     const blockedQuery = isBlockedSearchQuery(q)
+    const nextQueuePageRef = useRef(page + 1)
+
+    useEffect(() => {
+        nextQueuePageRef.current = page + 1
+    }, [q, page, country, excludeFeedId])
 
     useEffect(() => {
         if (!q) return
@@ -57,6 +63,37 @@ export default function SearchPage() {
             }
         }).finally(() => setLoading(false))
     }, [q, page, country, excludeFeedId, blockedQuery])
+
+    const sourceKey = `search:${q}:${country}:${excludeFeedId}:${page}`
+    const sourceTitle = q ? q : 'Search'
+    const queueItems = useMemo(
+        () => (searchResults || []).map((item) => feedItemToQueueItem(item)),
+        [searchResults]
+    )
+
+    const loadMoreForQueue = useCallback(async () => {
+        const targetPage = nextQueuePageRef.current
+        if (!q || targetPage > totalPage) return []
+        nextQueuePageRef.current = targetPage + 1
+        const limit = 10
+        const offset = (targetPage - 1) * limit
+        const data = await searchPodcastEpisodeFromItunes(
+            q,
+            'podcastEpisode',
+            country,
+            excludeFeedId,
+            offset,
+            limit,
+            200
+        )
+        return (data || []).map((item) => feedItemToQueueItem(item))
+    }, [q, totalPage, country, excludeFeedId])
+
+    useEffect(() => {
+        if (queueItems.length > 0) {
+            syncSourceQueue(sourceKey, queueItems, nextQueuePageRef.current <= totalPage, loadMoreForQueue)
+        }
+    }, [sourceKey, queueItems, totalPage, loadMoreForQueue, syncSourceQueue])
 
     const prevPageUrl = getTargetPageUrl(q, page, totalPage, Page.PrePage, entity, country, excludeFeedId)
     const nextPageUrl = getTargetPageUrl(q, page, totalPage, Page.NextPage, entity, country, excludeFeedId)
@@ -111,6 +148,16 @@ export default function SearchPage() {
                                                     showExcludeBtn: true
                                                 }}
                                                     onExcludeModalBtnClick={showExcludeDialog}
+                                                    onPlay={() => {
+                                                        nextQueuePageRef.current = page + 1
+                                                        playEpisode(feedItemToQueueItem(item), {
+                                                            items: queueItems,
+                                                            sourceTitle,
+                                                            sourceKey,
+                                                            hasMore: page < totalPage,
+                                                            loadMore: loadMoreForQueue,
+                                                        })
+                                                    }}
                                                 />
                                             )
                                         })
@@ -153,7 +200,7 @@ export default function SearchPage() {
 }
 
 const getTargetPageUrl = (keyword: string, currentPage: number, searchResultTotalPage: number, target: Page, entity: string, country: string, excludeFeedId: string): string => {
-    var targetPageNum = 0;
+    let targetPageNum = 0;
 
     if (target == Page.NextPage) {
         targetPageNum = currentPage >= searchResultTotalPage ? currentPage : currentPage + 1
