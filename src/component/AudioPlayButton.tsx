@@ -1,35 +1,75 @@
-import { useAppContext } from './AppContext'
+import { useAppContext } from './AppContext';
+import { audioParamsToQueueItem } from '../types/audio_player';
 
-export default function AudioPlayButton({ data }: { data: AudioPlayerParams }) {
+type AudioPlayButtonProps = {
+    data: AudioPlayerParams;
+    onPlay?: () => void;
+};
 
-    const { updateAudio, play } = useAppContext()
+export default function AudioPlayButton({ data, onPlay }: AudioPlayButtonProps) {
+    const { nowPlaying, isPlaying, playEpisode, togglePlayback } = useAppContext();
 
-    const parseHtmlStrinText = (htmlString: string): string => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlString, 'text/html');
-        const textContent = doc.body.textContent;
-        return textContent ?? '';
-    }
+    const targetId = data.id || data.itemId || data.src;
+    const isCurrentEpisode = Boolean(
+        nowPlaying &&
+            ((targetId && nowPlaying.id === targetId) ||
+                (data.src && nowPlaying.src === data.src))
+    );
+    const isPlayingThisEpisode = isCurrentEpisode && isPlaying;
 
     const onPlayBtnClick = () => {
-        var textTitle = parseHtmlStrinText(data.title)
-        var textAuthorName = parseHtmlStrinText(data.artist)
-
-        const playerParams: AudioPlayerParams = {
-            title: textTitle,
-            artist: textAuthorName,
-            cover: data.cover,
-            src: data.src
+        if (isCurrentEpisode) {
+            togglePlayback();
+            return;
         }
-        updateAudio(playerParams)
-        play()
-    }
+        if (onPlay) {
+            onPlay();
+            return;
+        }
+        playEpisode(audioParamsToQueueItem(data));
+    };
 
     return (
-        <>
-            <button className="btn btn-circle btn-outline btn-sm" onClick={onPlayBtnClick}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current rounded-full ml-1"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-            </button>
-        </>
-    )
+        <button
+            type="button"
+            aria-label={isPlayingThisEpisode ? 'Pause episode' : 'Play episode'}
+            title={isPlayingThisEpisode ? 'Pause episode' : 'Play episode'}
+            className={`btn btn-circle btn-sm ${
+                isPlayingThisEpisode ? 'btn-primary' : 'btn-outline'
+            }`}
+            onClick={onPlayBtnClick}
+        >
+            {isPlayingThisEpisode ? (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                </svg>
+            ) : (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="fill-current rounded-full ml-0.5"
+                >
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+            )}
+        </button>
+    );
 }

@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { AppProvider } from '../../component/AppContext'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AppProvider, useAppContext } from '../../component/AppContext'
 import EpisodeCard from '../../component/EpisodeCard'
 import Footer from '../../component/Footer'
 import Header from '../../component/Header'
@@ -12,10 +12,12 @@ import { smoothScrollToTop } from '../../libs/Common'
 import type { FeedItem } from '../../types/feed_item'
 import type { UserPlaylistDto } from '../../types/playlist'
 import Loading from '../../component/Loading'
+import { feedItemToQueueItem } from '../../types/audio_player'
 
 export default function PlaylistDetailPage() {
     const { userId, playlistId } = useParams()
     const [searchParams] = useSearchParams()
+    const { playEpisode, syncSourceQueue } = useAppContext()
     const page = parseInt(searchParams.get('page') || '1')
 
     const [loading, setLoading] = useState(true)
@@ -24,7 +26,12 @@ export default function PlaylistDetailPage() {
     const [playlistInfo, setPlaylistInfo] = useState<UserPlaylistDto | null>(null)
     const [itemList, setItemList] = useState<FeedItem[]>([])
     const [totalCount, setTotalCount] = useState(0)
-    const [totalPage, setTotalPage] = useState(1)
+
+    const nextQueuePageRef = useRef(page + 1)
+
+    useEffect(() => {
+        nextQueuePageRef.current = page + 1
+    }, [userId, playlistId, page])
 
     useEffect(() => {
         if (!userId || !playlistId) return
@@ -55,11 +62,35 @@ export default function PlaylistDetailPage() {
         fetchData()
     }, [userId, playlistId, page])
 
-    if (loading) return <Loading />
-
     const totalPageCalc = Math.max(1, Math.ceil(totalCount / 10))
     const prevPage = page > 1 ? page - 1 : 1
     const nextPage = page < totalPageCalc ? page + 1 : page
+
+    const sourceTitle = playlistInfo?.PlaylistName || 'Playlist'
+    const sourceKey = `playlist:${userId}:${playlistId}:${page}`
+    const queueItems = useMemo(
+        () => (itemList || []).map((item) => feedItemToQueueItem(item)),
+        [itemList]
+    )
+
+    const loadMoreForQueue = useCallback(async () => {
+        const targetPage = nextQueuePageRef.current
+        if (!userId || !playlistId || targetPage > totalPageCalc) return []
+        nextQueuePageRef.current = targetPage + 1
+        const resp = await getPlaylistItemListByUserId(userId, playlistId, targetPage)
+        if (resp.code === 0 && resp.data) {
+            return resp.data.map((item) => feedItemToQueueItem(item))
+        }
+        return []
+    }, [userId, playlistId, totalPageCalc])
+
+    useEffect(() => {
+        if (queueItems.length > 0) {
+            syncSourceQueue(sourceKey, queueItems, nextQueuePageRef.current <= totalPageCalc, loadMoreForQueue)
+        }
+    }, [sourceKey, queueItems, totalPageCalc, loadMoreForQueue, syncSourceQueue])
+
+    if (loading) return <Loading />
 
     return (
         <>
@@ -70,16 +101,16 @@ export default function PlaylistDetailPage() {
                             <div className='w-full max-w-2xl pl-6 pr-6'>
                                 <div className="w-full mb-10">
                                     <div className="flex justify-start mt-4">
-                                        <AvatarImage className="w-28" displayName={nickname} />
-                                        <div className="ml-3">
-                                            <div className="md:text-2xl text-xl font-bold">{playlistInfo?.PlaylistName}</div>
-                                            <div className="text-sm font-medium text-gray-500 mt-2">By {nickname}</div>
+                                        <AvatarImage className="w-28 shrink-0" displayName={nickname} />
+                                        <div className="ml-3 min-w-0 flex-1">
+                                            <div className="md:text-2xl text-xl font-bold break-words">{playlistInfo?.PlaylistName}</div>
+                                            <div className="text-sm font-medium text-gray-500 mt-2 break-words">By {nickname}</div>
                                             <div className="mt-4 -ml-2 flex justify-start">
                                                 <SharePlaylistBtn userId={userId!} playlistId={playlistId!} />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="mt-4 text-sm text-gray-500">{nickname}@Porkast</div>
+                                    <div className="mt-4 text-sm text-gray-500 break-words">{nickname}@Porkast</div>
                                 </div>
                                 <div className='text-neutral-500 text-sm mb-6 ml-2'>{totalCount} results</div>
 
@@ -102,7 +133,18 @@ export default function PlaylistDetailPage() {
                                                     audioSrc: item.EnclosureUrl,
                                                     hideAddToPlaylistBtn: isMyPage,
                                                     hideListenLaterBtn: isMyPage
-                                                }} />
+                                                }}
+                                                    onPlay={() => {
+                                                        nextQueuePageRef.current = page + 1
+                                                        playEpisode(feedItemToQueueItem(item), {
+                                                            items: queueItems,
+                                                            sourceTitle,
+                                                            sourceKey,
+                                                            hasMore: page < totalPageCalc,
+                                                            loadMore: loadMoreForQueue,
+                                                        })
+                                                    }}
+                                                />
                                             )
                                         })
                                     ) : null

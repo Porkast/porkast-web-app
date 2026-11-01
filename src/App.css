@@ -17,3 +17,55 @@
   --color-neutral: #241d18;
   --color-neutral-content: #f8f4ee;
 }
+
+/* Shikwasa player responsive & text overflow fixes */
+.shk {
+  --color-theme: #ffffff !important;
+  --background-body: #ffffff !important;
+  --color-text: #241d18 !important;
+  --color-secondary: #6b5e53 !important;
+  --color-button: #582a08 !important;
+  --color-handle: #582a08 !important;
+  --color-bar-played: #582a08 !important;
+  --color-bar-loaded: rgba(88, 42, 8, 0.18) !important;
+  --color-opac: rgba(88, 42, 8, 0.14) !important;
+}
+
+.shk-player {
+  box-shadow: none !important;
+  margin-top: 0 !important;
+}
+
+.shk-main {
+  min-width: 0;
+}
+
+.shk-text {
+  min-width: 0;
+  flex: 1 1 0% !important;
+  overflow: hidden;
+  padding-right: 8px;
+}
+
+.shk-artist_wrap,
+.shk-title_wrap {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shk-artist {
+  display: block !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .shk-text {
+    width: 100%;
+    padding-right: 0;
+  }
+}

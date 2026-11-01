@@ -1,9 +1,9 @@
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Header from '../component/Header'
 import EpisodeCard from '../component/EpisodeCard'
 import Footer from '../component/Footer'
-import { AppProvider } from '../component/AppContext'
+import { AppProvider, useAppContext } from '../component/AppContext'
 import parse from 'html-react-parser'
 import { addLinkTagToUrl, removeTextColorStyles, replaceWithBr, smoothScrollToTop } from '../libs/Common'
 import { getPodcastAllInfo } from '../libs/Itunes'
@@ -11,26 +11,65 @@ import { AvatarImage } from '../component/PorkastImage'
 import Loading from '../component/Loading'
 import ContentUnavailable from '../component/ContentUnavailable'
 import { CONTENT_REPORT_EMAIL } from '../libs/contentFilter'
+import { feedItemToQueueItem } from '../types/audio_player'
+import type { FeedItem } from '../types/feed_item'
 
 export default function PodcastChannelPage() {
     const { channelId } = useParams()
     const [searchParams] = useSearchParams()
+    const { playEpisode, syncSourceQueue } = useAppContext()
     const page = searchParams.get('page') || '1'
+    const currentPageNum = Math.max(1, parseInt(page) || 1)
     const [podcastData, setPodcastData] = useState<{ podcast: any; episodes: any[] } | null>(null)
     const [loadFailed, setLoadFailed] = useState(false)
+
+    const allChannelItemsRef = useRef<FeedItem[]>([])
+    const nextQueuePageRef = useRef(currentPageNum + 1)
+
+    useEffect(() => {
+        nextQueuePageRef.current = currentPageNum + 1
+    }, [channelId, currentPageNum])
 
     useEffect(() => {
         if (!channelId) return
         getPodcastAllInfo(channelId).then(data => {
             const limit = 10
-            const offset = (parseInt(page) - 1) * limit
+            const offset = (currentPageNum - 1) * limit
+            allChannelItemsRef.current = Array.isArray(data.podcast?.Items) ? [...data.podcast.Items] : []
             data.episodes = data.episodes.slice(offset, offset + limit)
             data.podcast.Items = data.podcast.Items.slice(offset, offset + limit)
             setPodcastData(data)
         }).catch(() => {
             setLoadFailed(true)
         })
-    }, [channelId, page])
+    }, [channelId, page, currentPageNum])
+
+    const fallbackCover = podcastData?.podcast?.ImageUrl || ''
+    const episodeTotalCount = podcastData?.podcast?.Count || 0
+    const limit = 10
+    const totalPage = Math.ceil(episodeTotalCount / limit)
+
+    const queueItems = useMemo(() => {
+        const items: FeedItem[] = podcastData?.podcast?.Items || []
+        return items.map((item) => feedItemToQueueItem(item, fallbackCover))
+    }, [podcastData, fallbackCover])
+
+    const loadMoreForQueue = useCallback(async () => {
+        const targetPage = nextQueuePageRef.current
+        if (targetPage > totalPage) return []
+        nextQueuePageRef.current = targetPage + 1
+        const offset = (targetPage - 1) * limit
+        const slice = allChannelItemsRef.current.slice(offset, offset + limit)
+        return slice.map((item) => feedItemToQueueItem(item, fallbackCover))
+    }, [totalPage, fallbackCover])
+
+    const sourceKey = `channel:${channelId}:${currentPageNum}`
+
+    useEffect(() => {
+        if (queueItems.length > 0) {
+            syncSourceQueue(sourceKey, queueItems, nextQueuePageRef.current <= totalPage, loadMoreForQueue)
+        }
+    }, [sourceKey, queueItems, totalPage, loadMoreForQueue, syncSourceQueue])
 
     if (loadFailed) {
         return (
@@ -46,14 +85,10 @@ export default function PodcastChannelPage() {
     if (!podcastData) return <Loading />
 
     const channelInfoData = podcastData.podcast
-    const episodeTotalCount = channelInfoData.Count
-    var channelDescription = channelInfoData.TextChannelDesc
+    let channelDescription = channelInfoData.TextChannelDesc
     channelDescription = addLinkTagToUrl(channelDescription)
     channelDescription = replaceWithBr(channelDescription)
     channelDescription = removeTextColorStyles(channelDescription)
-
-    const limit = 10
-    const totalPage = Math.ceil(episodeTotalCount / limit)
 
     let nextPage = parseInt(page)
     if (parseInt(page) < totalPage) nextPage = parseInt(page) + 1
@@ -62,6 +97,8 @@ export default function PodcastChannelPage() {
     let prePage = parseInt(page)
     if (parseInt(page) > 1) prePage = parseInt(page) - 1
     const prevPageUrl = "/podcast/" + channelId + "?page=" + prePage
+
+    const sourceTitle = channelInfoData.Title || 'Podcast'
 
     return (
         <AppProvider>
@@ -72,13 +109,13 @@ export default function PodcastChannelPage() {
                             {
                                 page == "1" ?
                                     <div className='w-full'>
-                                        <div className='text-3xl font-bold'>{channelInfoData.Title}</div>
+                                        <div className='text-3xl font-bold break-words'>{channelInfoData.Title}</div>
                                         <div className="w-full flex justify-start mt-4">
-                                            <div className="w-24">
+                                            <div className="w-24 shrink-0">
                                                 <AvatarImage imageUrl={channelInfoData.ImageUrl} />
                                             </div>
-                                            <div className="ml-3">
-                                                <div className="text-sm font-medium text-gray-500 mt-2">By {channelInfoData.Author}</div>
+                                            <div className="ml-3 min-w-0 flex-1">
+                                                <div className="text-sm font-medium text-gray-500 mt-2 break-words">By {channelInfoData.Author}</div>
                                                 <div className="flex justify-start mt-4">
                                                     <a className="btn btn-neutral btn-sm flex items-center rounded-lg" href={channelInfoData.FeedLink} target="_blank" rel="noopener noreferrer">
                                                         <svg className="w-4 h-4 icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4715" width="32" height="32">
@@ -91,11 +128,11 @@ export default function PodcastChannelPage() {
                                                         Link
                                                     </a>
                                                 </div>
-                                                <p className="mt-4 text-xs">{channelInfoData.Copyright}</p>
+                                                <p className="mt-4 text-xs break-words">{channelInfoData.Copyright}</p>
                                             </div>
                                         </div>
                                         <div className="mt-6">
-                                            <p className='text-base-content'>{parse(channelDescription)}</p>
+                                            <p className='text-base-content break-words'>{parse(channelDescription)}</p>
                                         </div>
                                         {
                                             channelInfoData.Categories == undefined || channelInfoData.Categories.length == 0 ? (
@@ -142,7 +179,18 @@ export default function PodcastChannelPage() {
                                                     pubDate: item.PubDate,
                                                     audioLength: item.Duration,
                                                     audioSrc: item.EnclosureUrl
-                                                }} />
+                                                }}
+                                                    onPlay={() => {
+                                                        nextQueuePageRef.current = currentPageNum + 1
+                                                        playEpisode(feedItemToQueueItem(item, fallbackCover), {
+                                                            items: queueItems,
+                                                            sourceTitle,
+                                                            sourceKey,
+                                                            hasMore: currentPageNum < totalPage,
+                                                            loadMore: loadMoreForQueue,
+                                                        })
+                                                    }}
+                                                />
                                             )
                                         })
                                     }

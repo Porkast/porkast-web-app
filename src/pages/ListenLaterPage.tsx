@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { AppProvider } from '../component/AppContext'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AppProvider, useAppContext } from '../component/AppContext'
 import EpisodeCard from '../component/EpisodeCard'
 import Footer from '../component/Footer'
 import Header from '../component/Header'
@@ -11,10 +11,12 @@ import { getTempNickname, getUserInfoFromServer, getUserSessionInfo } from '../l
 import { getListenLaterListByUserId } from '../libs/ListenLater'
 import type { UserListenLaterDto } from '../types/listen_later'
 import Loading from '../component/Loading'
+import { listenLaterItemToQueueItem } from '../types/audio_player'
 
 export default function ListenLaterPage() {
     const { userId } = useParams()
     const [searchParams] = useSearchParams()
+    const { playEpisode, syncSourceQueue } = useAppContext()
     const page = parseInt(searchParams.get('page') || '1')
 
     const [loading, setLoading] = useState(true)
@@ -22,7 +24,12 @@ export default function ListenLaterPage() {
     const [nickname, setNickname] = useState('')
     const [itemList, setItemList] = useState<UserListenLaterDto[]>([])
     const [totalCount, setTotalCount] = useState(0)
-    const [totalPage, setTotalPage] = useState(1)
+
+    const nextQueuePageRef = useRef(page + 1)
+
+    useEffect(() => {
+        nextQueuePageRef.current = page + 1
+    }, [userId, page])
 
     useEffect(() => {
         if (!userId) return
@@ -49,11 +56,35 @@ export default function ListenLaterPage() {
         fetchData()
     }, [userId, page])
 
-    if (loading) return <Loading />
-
     const totalPageCalc = Math.max(1, Math.ceil(totalCount / 10))
     const prevPage = page > 1 ? page - 1 : 1
     const nextPage = page < totalPageCalc ? page + 1 : page
+
+    const sourceTitle = 'Listen Later'
+    const sourceKey = `listen-later:${userId}:${page}`
+    const queueItems = useMemo(
+        () => (itemList || []).map((item) => listenLaterItemToQueueItem(item)),
+        [itemList]
+    )
+
+    const loadMoreForQueue = useCallback(async () => {
+        const targetPage = nextQueuePageRef.current
+        if (!userId || targetPage > totalPageCalc) return []
+        nextQueuePageRef.current = targetPage + 1
+        const resp = await getListenLaterListByUserId(userId, targetPage)
+        if (resp.code === 0 && resp.data) {
+            return resp.data.map((item) => listenLaterItemToQueueItem(item))
+        }
+        return []
+    }, [userId, totalPageCalc])
+
+    useEffect(() => {
+        if (queueItems.length > 0) {
+            syncSourceQueue(sourceKey, queueItems, nextQueuePageRef.current <= totalPageCalc, loadMoreForQueue)
+        }
+    }, [sourceKey, queueItems, totalPageCalc, loadMoreForQueue, syncSourceQueue])
+
+    if (loading) return <Loading />
 
     return (
         <AppProvider>
@@ -67,13 +98,13 @@ export default function ListenLaterPage() {
                                         <AvatarImage className="w-28" displayName={nickname} />
                                     </div>
                                     <div className="mt-4 flex justify-center">
-                                        <div className="md:text-2xl text-xl font-bold">{nickname}{`'s Porkast Listen Later`}</div>
+                                        <div className="md:text-2xl text-xl font-bold text-center break-words">{nickname}{`'s Porkast Listen Later`}</div>
                                     </div>
                                     <div className="mt-4 -ml-2 flex justify-center">
                                         <SharedListenLaterBtn creatorId={userId || ''} />
                                     </div>
                                     <div className="flex justify-center">
-                                        <div className="mt-4 text-sm text-gray-500">{nickname}@Porkast</div>
+                                        <div className="mt-4 text-sm text-gray-500 break-words">{nickname}@Porkast</div>
                                     </div>
                                 </div>
                             </div>
@@ -103,7 +134,18 @@ export default function ListenLaterPage() {
                                                 audioSrc: item.enclosure_url,
                                                 hideListenLaterBtn: isMyPage,
                                                 hideAddToPlaylistBtn: false
-                                            }} />
+                                            }}
+                                                onPlay={() => {
+                                                    nextQueuePageRef.current = page + 1
+                                                    playEpisode(listenLaterItemToQueueItem(item), {
+                                                        items: queueItems,
+                                                        sourceTitle,
+                                                        sourceKey,
+                                                        hasMore: page < totalPageCalc,
+                                                        loadMore: loadMoreForQueue,
+                                                    })
+                                                }}
+                                            />
                                         )
                                     })
                                 ) : null
