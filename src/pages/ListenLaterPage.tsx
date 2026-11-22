@@ -21,6 +21,7 @@ export default function ListenLaterPage() {
 
     const [loading, setLoading] = useState(true)
     const [isMyPage, setIsMyPage] = useState(false)
+    const [resolvedOwnerId, setResolvedOwnerId] = useState(userId || '')
     const [nickname, setNickname] = useState('')
     const [itemList, setItemList] = useState<UserListenLaterDto[]>([])
     const [totalCount, setTotalCount] = useState(0)
@@ -39,7 +40,9 @@ export default function ListenLaterPage() {
                 getUserSessionInfo(),
                 getUserInfoFromServer(userId),
             ])
-            if (userId === sessionUser.userId) {
+            const ownerId = (userResp.code === 0 && userResp.data?.id) ? userResp.data.id : userId
+            setResolvedOwnerId(ownerId)
+            if (ownerId && ownerId === sessionUser.userId) {
                 setIsMyPage(true)
             }
             if (userResp.code === 0 && userResp.data) {
@@ -84,6 +87,12 @@ export default function ListenLaterPage() {
         }
     }, [sourceKey, queueItems, totalPageCalc, loadMoreForQueue, syncSourceQueue])
 
+    useEffect(() => {
+        if (!loading) {
+            document.title = nickname ? `${nickname}'s Listen Later – Porkast` : 'Listen Later – Porkast'
+        }
+    }, [loading, nickname])
+
     if (loading) return <Loading />
 
     return (
@@ -101,7 +110,7 @@ export default function ListenLaterPage() {
                                         <div className="md:text-2xl text-xl font-bold text-center break-words">{nickname}{`'s Porkast Listen Later`}</div>
                                     </div>
                                     <div className="mt-4 -ml-2 flex justify-center">
-                                        <SharedListenLaterBtn creatorId={userId || ''} />
+                                        <SharedListenLaterBtn creatorId={resolvedOwnerId} />
                                     </div>
                                     <div className="flex justify-center">
                                         <div className="mt-4 text-sm text-gray-500 break-words">{nickname}@Porkast</div>
@@ -154,7 +163,7 @@ export default function ListenLaterPage() {
                                 <div className="join">
                                     {
                                         page > 1 ? (
-                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${userId}/?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${encodeURIComponent(userId || '')}/?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">«</button>
                                         )
@@ -162,7 +171,7 @@ export default function ListenLaterPage() {
                                     <button className="join-item btn btn-neutral">Page {page}</button>
                                     {
                                         page < totalPageCalc ? (
-                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${userId}/?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/listenlater/${encodeURIComponent(userId || '')}/?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">»</button>
                                         )

@@ -60,7 +60,7 @@ export const getUserSubscriptionList = async (userId: string, limit: number = SU
 }
 
 export const getUserKeywordSubscriptionItemList = async (userId: string, keyword: string, page: string): Promise<{ code: number, message: string, data: FeedItem[] }> => {
-    let requestAPI = `${API_URL}/subscribe/${userId}/${keyword}`
+    let requestAPI = `${API_URL}/subscribe/${encodeURIComponent(userId)}/${encodeURIComponent(keyword)}`
     if (page) {
         requestAPI = `${requestAPI}?page=${page}`
     }
@@ -77,7 +77,7 @@ export const getUserKeywordSubscriptionItemList = async (userId: string, keyword
 }
 
 export const unsubscribeKeyword = async (userId: string, keyword: string): Promise<JsonResponse> => {
-    const apiUrl = `${API_URL}/subscribe/${userId}/${encodeURIComponent(keyword)}`
+    const apiUrl = `${API_URL}/subscribe/${encodeURIComponent(userId)}/${encodeURIComponent(keyword)}`
     const resp = await fetch(apiUrl, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
@@ -87,7 +87,7 @@ export const unsubscribeKeyword = async (userId: string, keyword: string): Promi
 }
 
 export const getUserAllSubscriptionItems = async (userId: string, offset: number, limit: number): Promise<{ code: number, message: string, data: FeedItem[] }> => {
-    const resp = await fetch(`${API_URL}/subscribe/episodes/${userId}?offset=${offset}&limit=${limit}`, {
+    const resp = await fetch(`${API_URL}/subscribe/episodes/${encodeURIComponent(userId)}?offset=${offset}&limit=${limit}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     })

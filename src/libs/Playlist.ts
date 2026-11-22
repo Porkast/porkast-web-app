@@ -23,7 +23,7 @@ export async function addToPlayList(userId: string, channelId: string, itemId: s
 export async function getUserPlaylistByUserId(userId: string, page: number = 1): Promise<JsonResponse> {
     const limit = 10
     const offset = (page - 1) * limit
-    const respJson = await fetch(`${API_URL}/playlist/list/${userId}?limit=${limit}&offset=${offset}`, {
+    const respJson = await fetch(`${API_URL}/playlist/list/${encodeURIComponent(userId)}?limit=${limit}&offset=${offset}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     }).then(resp => resp.json()).catch(err => {
@@ -64,7 +64,7 @@ export async function getPlaylistInfoById(playlistId: string): Promise<{ code: n
 export const getPlaylistItemListByUserId = async (userId: string, playlistId: string, page: number): Promise<{ code: number, message: string, data: FeedItem[] }> => {
     const limit = 10
     const offset = (page - 1) * limit
-    const resp = await fetch(`${API_URL}/playlist/list/${userId}/${playlistId}?limit=${limit}&offset=${offset}`, {
+    const resp = await fetch(`${API_URL}/playlist/list/${encodeURIComponent(userId)}/${encodeURIComponent(playlistId)}?limit=${limit}&offset=${offset}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     })

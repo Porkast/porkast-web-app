@@ -23,6 +23,7 @@ export default function SubscriptionKeywordPage() {
 
     const [loading, setLoading] = useState(true)
     const [isMyPage, setIsMyPage] = useState(false)
+    const [resolvedOwnerId, setResolvedOwnerId] = useState(userId || '')
     const [nickname, setNickname] = useState('')
     const [itemList, setItemList] = useState<FeedItem[]>([])
     const [totalCount, setTotalCount] = useState(0)
@@ -42,7 +43,9 @@ export default function SubscriptionKeywordPage() {
                 getUserSessionInfo(),
                 getUserInfoFromServer(userId),
             ])
-            if (userId === sessionUser.userId) {
+            const ownerId = (userResp.code === 0 && userResp.data?.id) ? userResp.data.id : userId
+            setResolvedOwnerId(ownerId)
+            if (ownerId && ownerId === sessionUser.userId) {
                 setIsMyPage(true)
             }
             if (userResp.code === 0 && userResp.data) {
@@ -87,6 +90,12 @@ export default function SubscriptionKeywordPage() {
         }
     }, [sourceKey, queueItems, totalPageCalc, loadMoreForQueue, syncSourceQueue])
 
+    useEffect(() => {
+        if (decodedKeyword) {
+            document.title = `#${decodedKeyword} – Porkast`
+        }
+    }, [decodedKeyword])
+
     if (loading) return <Loading />
 
     return (
@@ -104,12 +113,12 @@ export default function SubscriptionKeywordPage() {
                                         {
                                             isMyPage ? (
                                                 <div className="mt-4 -ml-2 flex justify-start flex-wrap gap-y-2">
-                                                    <ShareSearchSubscriptionBtn userId={userId!} keyword={keyword!} />
-                                                    <UnsubscribeKeywordButton userId={userId!} keyword={keyword!} />
+                                                    <ShareSearchSubscriptionBtn userId={resolvedOwnerId} keyword={keyword!} />
+                                                    <UnsubscribeKeywordButton userId={resolvedOwnerId} keyword={keyword!} />
                                                 </div>
                                             ) : (
                                                 <div className="mt-4 -ml-2 flex justify-start">
-                                                    <SubscribeListenLaterBtn creatorId={userId!} />
+                                                    <SubscribeListenLaterBtn creatorId={resolvedOwnerId} />
                                                 </div>
                                             )
                                         }
@@ -154,7 +163,7 @@ export default function SubscriptionKeywordPage() {
                                 <div className="join">
                                     {
                                         page > 1 ? (
-                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/${keyword}?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/subscription/${encodeURIComponent(userId || '')}/${encodeURIComponent(decodedKeyword)}?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">«</button>
                                         )
@@ -162,7 +171,7 @@ export default function SubscriptionKeywordPage() {
                                     <button className="join-item btn btn-neutral">Page {page}</button>
                                     {
                                         page < totalPageCalc ? (
-                                            <Link className="join-item btn btn-neutral" to={`/subscription/${userId}/${keyword}?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
+                                            <Link className="join-item btn btn-neutral" to={`/subscription/${encodeURIComponent(userId || '')}/${encodeURIComponent(decodedKeyword)}?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                         ) : (
                                             <button className="join-item btn btn-neutral btn-disabled">»</button>
                                         )
