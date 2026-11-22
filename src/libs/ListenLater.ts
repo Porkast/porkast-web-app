@@ -21,7 +21,7 @@ export async function addToListenLater(channelId: string, itemId: string, userId
 export const getListenLaterListByUserId = async (userId: string, page: number): Promise<{ code: number, message: string, data: UserListenLaterDto[] }> => {
     const limit = 10
     const offset = (page - 1) * limit
-    const apiUrl = `${API_URL}/listenlater/list/${userId}?limit=${limit}&offset=${offset}`
+    const apiUrl = `${API_URL}/listenlater/list/${encodeURIComponent(userId)}?limit=${limit}&offset=${offset}`
     const resp = await fetch(apiUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }

@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["6ZB75QMF7G.com.guoshao.porkast"],
+        "components": [
+          { "/": "/podcast/*" },
+          { "/": "/subscription/*/*" },
+          { "/": "/listenlater/*" },
+          { "/": "/playlist/*/*" }
+        ]
+      }
+    ]
+  }
+}

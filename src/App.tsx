@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import SignInPage from './pages/SignInPage'
 import SearchPage from './pages/SearchPage'
@@ -21,9 +22,23 @@ import ApplePodcastGuidePage from './pages/ApplePodcastGuidePage'
 import NotFound from './pages/NotFound'
 import { AppProvider } from './component/AppContext'
 
+function SmartAppBannerSync() {
+  const location = useLocation()
+
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="apple-itunes-app"]')
+    if (meta) {
+      meta.setAttribute('content', `app-id=6768356920, app-argument=${window.location.href}`)
+    }
+  }, [location.pathname, location.search, location.hash])
+
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <SmartAppBannerSync />
       <AppProvider>
         <Routes>
           <Route path="/" element={<Home />} />

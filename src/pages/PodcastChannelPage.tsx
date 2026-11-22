@@ -71,6 +71,13 @@ export default function PodcastChannelPage() {
         }
     }, [sourceKey, queueItems, totalPage, loadMoreForQueue, syncSourceQueue])
 
+    useEffect(() => {
+        const channelTitle = podcastData?.podcast?.Title
+        if (channelTitle) {
+            document.title = `${channelTitle} – Porkast`
+        }
+    }, [podcastData])
+
     if (loadFailed) {
         return (
             <AppProvider>

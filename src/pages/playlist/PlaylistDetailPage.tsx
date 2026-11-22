@@ -22,6 +22,7 @@ export default function PlaylistDetailPage() {
 
     const [loading, setLoading] = useState(true)
     const [isMyPage, setIsMyPage] = useState(false)
+    const [resolvedOwnerId, setResolvedOwnerId] = useState(userId || '')
     const [nickname, setNickname] = useState('')
     const [playlistInfo, setPlaylistInfo] = useState<UserPlaylistDto | null>(null)
     const [itemList, setItemList] = useState<FeedItem[]>([])
@@ -42,7 +43,9 @@ export default function PlaylistDetailPage() {
                 getUserSessionInfo(),
                 getUserInfoFromServer(userId),
             ])
-            if (userId === sessionUser.userId) {
+            const ownerId = (userResp.code === 0 && userResp.data?.id) ? userResp.data.id : userId
+            setResolvedOwnerId(ownerId)
+            if (ownerId && ownerId === sessionUser.userId) {
                 setIsMyPage(true)
             }
             if (userResp.code === 0 && userResp.data) {
@@ -90,6 +93,12 @@ export default function PlaylistDetailPage() {
         }
     }, [sourceKey, queueItems, totalPageCalc, loadMoreForQueue, syncSourceQueue])
 
+    useEffect(() => {
+        if (playlistInfo?.PlaylistName) {
+            document.title = `${playlistInfo.PlaylistName} – Porkast`
+        }
+    }, [playlistInfo])
+
     if (loading) return <Loading />
 
     return (
@@ -106,7 +115,7 @@ export default function PlaylistDetailPage() {
                                             <div className="md:text-2xl text-xl font-bold break-words">{playlistInfo?.PlaylistName}</div>
                                             <div className="text-sm font-medium text-gray-500 mt-2 break-words">By {nickname}</div>
                                             <div className="mt-4 -ml-2 flex justify-start">
-                                                <SharePlaylistBtn userId={userId!} playlistId={playlistId!} />
+                                                <SharePlaylistBtn userId={resolvedOwnerId} playlistId={playlistId!} />
                                             </div>
                                         </div>
                                     </div>
@@ -154,7 +163,7 @@ export default function PlaylistDetailPage() {
                                     <div className="join">
                                         {
                                             page > 1 ? (
-                                                <Link className="join-item btn btn-neutral" to={`/playlist/${userId}/${playlistId}?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
+                                                <Link className="join-item btn btn-neutral" to={`/playlist/${encodeURIComponent(userId || '')}/${encodeURIComponent(playlistId || '')}?page=${prevPage}`} onClick={() => smoothScrollToTop()}>«</Link>
                                             ) : (
                                                 <button className="join-item btn btn-neutral btn-disabled">«</button>
                                             )
@@ -162,7 +171,7 @@ export default function PlaylistDetailPage() {
                                         <button className="join-item btn btn-neutral">Page {page}</button>
                                         {
                                             page < totalPageCalc ? (
-                                                <Link className="join-item btn btn-neutral" to={`/playlist/${userId}/${playlistId}?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
+                                                <Link className="join-item btn btn-neutral" to={`/playlist/${encodeURIComponent(userId || '')}/${encodeURIComponent(playlistId || '')}?page=${nextPage}`} onClick={() => smoothScrollToTop()}>»</Link>
                                             ) : (
                                                 <button className="join-item btn btn-neutral btn-disabled">»</button>
                                             )

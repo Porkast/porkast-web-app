@@ -43,6 +43,12 @@ export default function PodcastEpisodePage() {
         }
     }, [channelId, rawItemId, search])
 
+    useEffect(() => {
+        if (episode?.Title) {
+            document.title = podcastInfo?.Title ? `${episode.Title} – ${podcastInfo.Title}` : `${episode.Title} – Porkast`
+        }
+    }, [episode, podcastInfo])
+
     if (!channelId || !rawItemId) {
         return <NotFound />
     }
