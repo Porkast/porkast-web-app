@@ -98,6 +98,7 @@ const QueueArtwork = ({ src, alt, sizeClass }: { src: string; alt: string; sizeC
         src={src || '/porkast-logo.png'}
         alt={alt}
         loading="lazy"
+        referrerPolicy="no-referrer"
         onError={(e) => {
             const target = e.currentTarget;
             if (!target.src.endsWith('/porkast-logo.png')) {

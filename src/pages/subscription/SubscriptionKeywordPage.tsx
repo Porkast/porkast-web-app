@@ -127,6 +127,7 @@ export default function SubscriptionKeywordPage() {
                                             title: item.Title,
                                             description: item.Description,
                                             image: item.ImageUrl,
+                                            fallbackImages: [item.ChannelImageUrl],
                                             link: item.Link,
                                             rssLink: item.FeedLink,
                                             channelName: item.ChannelTitle,

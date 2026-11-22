@@ -30,7 +30,7 @@ function App() {
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/podcast/:channelId" element={<PodcastChannelPage />} />
-          <Route path="/podcast/:channelId/episode/:itemId" element={<PodcastEpisodePage />} />
+          <Route path="/podcast/:channelId/episode/*" element={<PodcastEpisodePage />} />
           <Route path="/subscription/:userId" element={<SubscriptionPage />} />
           <Route path="/subscription/:userId/:keyword" element={<SubscriptionKeywordPage />} />
           <Route path="/listenlater/:userId" element={<ListenLaterPage />} />
