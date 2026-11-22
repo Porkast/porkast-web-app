@@ -6,6 +6,7 @@ export type FeedChannel = {
     ChannelDesc: string;
     TextChannelDesc: string;
     ImageUrl: string;
+    FallbackImageUrls?: string[];
     Link: string;
     FeedLink: string;
     FeedType: string;

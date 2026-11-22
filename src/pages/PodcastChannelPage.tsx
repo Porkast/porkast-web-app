@@ -112,7 +112,12 @@ export default function PodcastChannelPage() {
                                         <div className='text-3xl font-bold break-words'>{channelInfoData.Title}</div>
                                         <div className="w-full flex justify-start mt-4">
                                             <div className="w-24 shrink-0">
-                                                <AvatarImage imageUrl={channelInfoData.ImageUrl} />
+                                                <AvatarImage
+                                                    className="w-24 h-24"
+                                                    imageUrl={channelInfoData.ImageUrl}
+                                                    fallbackUrls={channelInfoData.FallbackImageUrls}
+                                                    alt={channelInfoData.Title}
+                                                />
                                             </div>
                                             <div className="ml-3 min-w-0 flex-1">
                                                 <div className="text-sm font-medium text-gray-500 mt-2 break-words">By {channelInfoData.Author}</div>
@@ -172,6 +177,11 @@ export default function PodcastChannelPage() {
                                                     title: item.HighlightTitle,
                                                     description: item.TextDescription,
                                                     image: item.ImageUrl == "" ? podcastData.podcast.ImageUrl : item.ImageUrl,
+                                                    fallbackImages: [
+                                                        item.ChannelImageUrl,
+                                                        channelInfoData.ImageUrl,
+                                                        ...(channelInfoData.FallbackImageUrls || []),
+                                                    ],
                                                     link: item.Link,
                                                     rssLink: item.FeedLink,
                                                     channelName: item.ChannelTitle,

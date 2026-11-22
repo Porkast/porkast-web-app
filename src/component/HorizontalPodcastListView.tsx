@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import parse from 'html-react-parser'
+import { AvatarImage } from "./PorkastImage";
 
 type ScrollPodcastListViewProps = {
     podcastChannelInfoList: PodcastChannelInfo[];
@@ -35,16 +36,11 @@ export default function HorizontalPodcastListView(props: ScrollPodcastListViewPr
                 channelInfoList.map((podcastChannelInfo) => (
                     <a href={`/podcast/${podcastChannelInfo.Id}`} key={podcastChannelInfo.Id} className="carousel-item mr-4 w-24">
                         <div className="mb-2">
-                            <div className="avatar justify-center">
-                                <div className="w-24 h-24 rounded">
-                                    {
-                                        podcastChannelInfo.ImageUrl == "" || podcastChannelInfo.ImageUrl == null || podcastChannelInfo.ImageUrl == "null" ?
-                                            <img src="/porkast-text-logo.png" alt="podcast cover" />
-                                            :
-                                            <img src={podcastChannelInfo.ImageUrl} alt="podcast" />
-                                    }
-                                </div>
-                            </div>
+                            <AvatarImage
+                                className="w-24 h-24"
+                                imageUrl={podcastChannelInfo.ImageUrl}
+                                alt={podcastChannelInfo.Title}
+                            />
                             <div className="w-20 ml-2 mr-2 text-sm truncate">{parse(podcastChannelInfo.Title)}</div>
                         </div>
                     </a>

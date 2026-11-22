@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Footer from '../component/Footer'
 import Header from '../component/Header'
@@ -13,25 +13,39 @@ import type { FeedItem } from '../types/feed_item'
 import type { FeedChannel } from '../types/feed_channel'
 import Loading from '../component/Loading'
 import ContentUnavailable from '../component/ContentUnavailable'
+import { AvatarImage } from '../component/PorkastImage'
+import NotFound from './NotFound'
 import { CONTENT_REPORT_EMAIL } from '../libs/contentFilter'
 import { feedItemToQueueItem } from '../types/audio_player'
 
 export default function PodcastEpisodePage() {
-    const { channelId, itemId } = useParams()
+    const { channelId, '*': rawItemId } = useParams()
+    const { search } = useLocation()
     const { playEpisode } = useAppContext()
     const [episode, setEpisode] = useState<FeedItem | null>(null)
     const [podcastInfo, setPodcastInfo] = useState<FeedChannel | null>(null)
     const [loadFailed, setLoadFailed] = useState(false)
 
     useEffect(() => {
-        if (!channelId || !itemId) return
-        getPodcastEpisodeInfo(channelId, itemId).then(data => {
+        if (!channelId || !rawItemId) return
+        let cancelled = false
+        setLoadFailed(false)
+        getPodcastEpisodeInfo(channelId, rawItemId, search).then(data => {
+            if (cancelled) return
             setEpisode(data.episode as any)
             setPodcastInfo(data.podcast as any)
         }).catch(() => {
+            if (cancelled) return
             setLoadFailed(true)
         })
-    }, [channelId, itemId])
+        return () => {
+            cancelled = true
+        }
+    }, [channelId, rawItemId, search])
+
+    if (!channelId || !rawItemId) {
+        return <NotFound />
+    }
 
     if (loadFailed) {
         return (
@@ -74,10 +88,17 @@ export default function PodcastEpisodePage() {
                         <div className='w-full'>
                             <div className='text-xl font-bold break-words'>{episode.Title}</div>
                             <div className="w-full flex justify-start mt-4">
-                                <div className="avatar shrink-0">
-                                    <div className="w-24 rounded-xl">
-                                        <img src={episode.ImageUrl || podcastInfo.ImageUrl} alt={episode.Title} />
-                                    </div>
+                                <div className="shrink-0">
+                                    <AvatarImage
+                                        className="w-24 h-24"
+                                        imageUrl={episode.ImageUrl || podcastInfo.ImageUrl}
+                                        fallbackUrls={[
+                                            episode.ChannelImageUrl,
+                                            podcastInfo.ImageUrl,
+                                            ...(podcastInfo.FallbackImageUrls || []),
+                                        ]}
+                                        alt={episode.Title}
+                                    />
                                 </div>
                                 <div className="ml-3 min-w-0 flex-1">
                                     <a href={podcastChannelLink} className="text-base font-bold mt-2 block break-words">{podcastInfo.Title}</a>

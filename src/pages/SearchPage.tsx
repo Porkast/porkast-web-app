@@ -138,6 +138,7 @@ export default function SearchPage() {
                                                     title: item.HighlightTitle,
                                                     description: item.TextDescription,
                                                     image: item.ImageUrl,
+                                                    fallbackImages: [item.ChannelImageUrl],
                                                     link: item.Link,
                                                     rssLink: item.FeedLink,
                                                     channelName: item.HighlightChannelTitle,

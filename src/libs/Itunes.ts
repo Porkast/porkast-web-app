@@ -3,6 +3,7 @@ import { convertMillsTimeToDuration } from "./Common"
 import { FeedChannel } from "../types/feed_channel"
 import { API_URL } from "./Constants"
 import { CONTENT_POLICY_ERROR, isBlockedContent } from "./contentFilter"
+import { getEpisodeIdCandidates } from "./episodeUrl"
 
 interface RssItem {
     guid: string;
@@ -179,14 +180,15 @@ export const getPodcastAllInfo = async (podcastId: string): Promise<{ podcast: F
     const jsonResp = await res.json()
     const podcastInfo = jsonResp.results[0]
     const feedLink = podcastInfo.feedUrl
+    const itunesArtwork = podcastInfo?.artworkUrl600 || podcastInfo?.artworkUrl100 || ''
     const rssFeed = await parsePodcastRSS(feedLink);
     assertChannelAllowed(rssFeed)
 
     var episodeList: FeedItem[] = []
     rssFeed.items.filter(isAllowedRssItem).forEach(item => {
-        episodeList.push(buildFeedItemModel(rssFeed, feedLink, encodeURIComponent(item.guid), podcastId));
+        episodeList.push(buildFeedItemModel(rssFeed, feedLink, item.guid, podcastId, '', itunesArtwork));
     })
-    var channelInfo: FeedChannel = buildFeedChannelModel(rssFeed, feedLink, podcastId);
+    var channelInfo: FeedChannel = buildFeedChannelModel(rssFeed, feedLink, podcastId, itunesArtwork);
     channelInfo.Items = episodeList
     channelInfo.Count = episodeList.length
 
@@ -196,14 +198,15 @@ export const getPodcastAllInfo = async (podcastId: string): Promise<{ podcast: F
     }
 }
 
-export const getPodcastEpisodeInfo = async (podcastId: string, episodeId: string): Promise<{ podcast: FeedChannel, episode: FeedItem }> => {
+export const getPodcastEpisodeInfo = async (podcastId: string, episodeId: string, search: string = ''): Promise<{ podcast: FeedChannel, episode: FeedItem }> => {
     const res = await fetch(`https://itunes.apple.com/lookup?id=${podcastId}&entity=podcast`)
     const jsonResp = await res.json()
     const podcastInfo = jsonResp.results[0]
     const feedLink = podcastInfo.feedUrl
+    const itunesArtwork = podcastInfo?.artworkUrl600 || podcastInfo?.artworkUrl100 || ''
     const rss = await parsePodcastRSS(feedLink);
     assertChannelAllowed(rss)
-    const episodeInfo = buildFeedItemModel(rss, feedLink, episodeId, podcastId);
+    const episodeInfo = buildFeedItemModel(rss, feedLink, episodeId, podcastId, search, itunesArtwork);
     if (isBlockedContent({
         title: episodeInfo.Title,
         description: episodeInfo.Description,
@@ -212,7 +215,7 @@ export const getPodcastEpisodeInfo = async (podcastId: string, episodeId: string
     })) {
         throw new Error(CONTENT_POLICY_ERROR)
     }
-    var channelInfo: FeedChannel = buildFeedChannelModel(rss, feedLink, podcastId);
+    var channelInfo: FeedChannel = buildFeedChannelModel(rss, feedLink, podcastId, itunesArtwork);
 
     return {
         podcast: channelInfo,
@@ -220,13 +223,15 @@ export const getPodcastEpisodeInfo = async (podcastId: string, episodeId: string
     }
 }
 
-const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: string, podcastId: string): FeedItem => {
+const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: string, podcastId: string, search: string = '', itunesArtwork: string = ''): FeedItem => {
     const rssItemList = rssFeed.items
+    const candidates = getEpisodeIdCandidates(episodeId, search)
     const targetItem = rssItemList.find(item => {
-        if (encodeURIComponent(item.guid) === episodeId || item.guid === episodeId) {
-            return true
-        }
+        if (!item.guid) return false
+        const encodedGuid = encodeURIComponent(item.guid)
+        return candidates.some(candidate => candidate === item.guid || candidate === encodedGuid)
     })
+    const resolvedGuid = targetItem?.guid || episodeId
     const formatedPubDate = new Date(targetItem?.pubDate || '').toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
     var formaedDuration = '';
     const durationStr = String(targetItem?.itunes.duration || '')
@@ -237,7 +242,7 @@ const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: strin
         formaedDuration = convertMillsTimeToDuration(durationInt)
     }
     var episodeInfo: FeedItem = {
-        Id: episodeId,
+        Id: resolvedGuid,
         ChannelId: podcastId,
         Title: targetItem?.title || '',
         HighlightTitle: targetItem?.title || '',
@@ -245,7 +250,7 @@ const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: strin
         PubDate: formatedPubDate,
         Author: targetItem?.itunes.author || rssFeed.itunes.author || '',
         InputDate: new Date(targetItem?.pubDate || ''),
-        ImageUrl: targetItem?.itunes.image || rssFeed.itunes.image || rssFeed.imageUrl || '',
+        ImageUrl: targetItem?.itunes.image || rssFeed.itunes.image || rssFeed.imageUrl || itunesArtwork,
         EnclosureUrl: targetItem?.enclosure?.url || '',
         EnclosureType: targetItem?.enclosure?.type || '',
         EnclosureLength: String(targetItem?.enclosure?.length || ''),
@@ -256,7 +261,7 @@ const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: strin
         EpisodeType: String(targetItem?.itunes.episodeType || ''),
         Description: targetItem?.description || "",
         TextDescription: targetItem?.contentSnippet || targetItem?.description || "",
-        ChannelImageUrl: rssFeed.itunes.image || rssFeed.imageUrl || '',
+        ChannelImageUrl: rssFeed.itunes.image || rssFeed.imageUrl || itunesArtwork,
         ChannelTitle: rssFeed.title,
         HighlightChannelTitle: rssFeed.title,
         FeedLink: feedLink,
@@ -264,7 +269,7 @@ const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: strin
         TookTime: 0,
         HasThumbnail: false,
         FeedId: podcastId,
-        GUID: episodeId,
+        GUID: resolvedGuid,
         Source: "itunes",
         ExcludeFeedId: "",
         Country: ""
@@ -273,13 +278,18 @@ const buildFeedItemModel = (rssFeed: RssFeed, feedLink: string, episodeId: strin
     return episodeInfo
 }
 
-const buildFeedChannelModel = (rssFeed: RssFeed, feedLink: string, podcastId: string): FeedChannel => {
+const buildFeedChannelModel = (rssFeed: RssFeed, feedLink: string, podcastId: string, itunesArtwork: string = ''): FeedChannel => {
+    const channelImage = rssFeed.itunes.image || rssFeed.imageUrl || itunesArtwork;
+    const fallbackImageUrls = Array.from(
+        new Set([rssFeed.itunes.image, rssFeed.imageUrl, itunesArtwork].filter(Boolean))
+    );
     var channelInfo: FeedChannel = {
         Id: podcastId,
         Title: rssFeed.title,
         ChannelDesc: rssFeed.description || '',
         TextChannelDesc: rssFeed.description || '',
-        ImageUrl: rssFeed.itunes.image || rssFeed.imageUrl || '',
+        ImageUrl: channelImage,
+        FallbackImageUrls: fallbackImageUrls,
         Link: rssFeed.link || '',
         FeedLink: feedLink,
         FeedType: rssFeed.itunes.type || '',

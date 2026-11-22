@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+
+const DEFAULT_PODCAST_ICON = '/porkast-logo.png'
 
 const AVATAR_COLORS = [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
@@ -19,52 +21,76 @@ function getInitial(name: string): string {
     return name.charAt(0).toUpperCase()
 }
 
-type AvatarImageProps = {
-    imageUrl?: string
-    className?: string
-    displayName?: string
+function normalizeImageUrl(url?: string | null): string {
+    if (!url) return ''
+    const trimmed = url.trim()
+    if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return ''
+    return trimmed
 }
 
-export const AvatarImage = ({ imageUrl, className, displayName }: AvatarImageProps) => {
+type AvatarImageProps = {
+    imageUrl?: string
+    fallbackUrls?: Array<string | undefined | null>
+    className?: string
+    displayName?: string
+    alt?: string
+}
 
-    const [avatarUrl, setAvatarUrl] = useState("")
+export const AvatarImage = ({ imageUrl, fallbackUrls, className, displayName, alt }: AvatarImageProps) => {
+    const candidatesKey = [imageUrl, ...(fallbackUrls || [])]
+        .map((url) => normalizeImageUrl(url))
+        .filter(Boolean)
+        .join('\n')
+
+    const candidates = useMemo(() => {
+        if (!candidatesKey) return []
+        return Array.from(new Set(candidatesKey.split('\n')))
+    }, [candidatesKey])
+
+    const [candidateIndex, setCandidateIndex] = useState(0)
 
     useEffect(() => {
-        setAvatarUrl(imageUrl || "")
-    }, [imageUrl])
+        setCandidateIndex(0)
+    }, [candidatesKey])
+
+    const activeUrl = candidates[candidateIndex] || ''
 
     return (
-        <>
-            <div className="avatar">
-                <div className={`rounded-xl ${className}`}>
-                    {
-                        avatarUrl ?
-                            <img src={avatarUrl} />
-                        : displayName ?
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 100 100"
-                                className="w-full h-full"
+        <div className="avatar">
+            <div className={`rounded-xl ${className || ''}`}>
+                {
+                    activeUrl ?
+                        <img
+                            key={activeUrl}
+                            src={activeUrl}
+                            alt={alt || displayName || 'Podcast cover'}
+                            referrerPolicy="no-referrer"
+                            onError={() => setCandidateIndex((prev) => prev + 1)}
+                        />
+                    : displayName ?
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 100 100"
+                            className="w-full h-full"
+                        >
+                            <circle cx="50" cy="50" r="50" fill={getColorFromName(displayName)} />
+                            <text
+                                x="50"
+                                y="50"
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fill="white"
+                                fontSize="40"
+                                fontWeight="bold"
+                                fontFamily="system-ui, -apple-system, sans-serif"
                             >
-                                <circle cx="50" cy="50" r="50" fill={getColorFromName(displayName)} />
-                                <text
-                                    x="50"
-                                    y="50"
-                                    textAnchor="middle"
-                                    dominantBaseline="central"
-                                    fill="white"
-                                    fontSize="40"
-                                    fontWeight="bold"
-                                    fontFamily="system-ui, -apple-system, sans-serif"
-                                >
-                                    {getInitial(displayName)}
-                                </text>
-                            </svg>
-                        :
-                            <img src="/porkast-text-logo.png" />
-                    }
-                </div>
+                                {getInitial(displayName)}
+                            </text>
+                        </svg>
+                    :
+                        <img src={DEFAULT_PODCAST_ICON} alt={alt || 'Porkast'} />
+                }
             </div>
-        </>
+        </div>
     )
 }
